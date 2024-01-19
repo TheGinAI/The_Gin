@@ -6,6 +6,18 @@ A simple template of the project
 
 To utilize Machine Learning to train a model in playing the card game "gin", and to implement a User Interface to allow a human player to compete against the Artificial Neural Network. 
 
+## Group Information
+
+### Group Members and Roles
+
+* Kanglin Xu
+   * 
+* Tomas Rohatynski
+   *
+* Zechariah Dunlap
+   *     
+### Group Meeting and Activities
+
 ## Getting Started
 
 ### Dependencies
