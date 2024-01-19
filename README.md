@@ -37,9 +37,9 @@ command to run if program contains helper info
 
 Contributors names and contact info
 
-Kanglin Xu - kanglin.xu@ttu.edu
-Tomas Rohatynski - trohatyn@ttu.edu
-Zechariah Dunlap - zdunlap@ttu.edu
+* Kanglin Xu - kanglin.xu@ttu.edu
+* Tomas Rohatynski - trohatyn@ttu.edu
+* Zechariah Dunlap - zdunlap@ttu.edu
 
 ## Version History
 
