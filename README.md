@@ -11,12 +11,14 @@ To utilize Machine Learning to train a model in playing the card game "gin", and
 ### Group Members and Roles
 
 * Kanglin Xu
-   * 
+   * Role
 * Tomas Rohatynski
-   *
+   * Role
 * Zechariah Dunlap
-   *     
+   * Role
 ### Group Meeting and Activities
+
+### Meeting Schedules
 
 ## Getting Started
 
