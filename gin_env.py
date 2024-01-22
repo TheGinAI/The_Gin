@@ -109,8 +109,6 @@ class Hand:
         set_4_7 = self.cards[3].rank == self.cards[4].rank == self.cards[5].rank == self.cards[6].rank
         set_5_7 = set_4_7 or (self.cards[4].rank == self.cards[5].rank == self.cards[6].rank)
 
-        print(set_1_3, set_1_4, set_4_7, set_5_7)
-
         if (set_1_3 and set_4_7) or (set_1_4 and set_5_7):
             return True
 
@@ -123,14 +121,13 @@ class Hand:
         run_4_7 = self.cards[3].suit == self.cards[4].suit == self.cards[5].suit == self.cards[6].suit and ((self.cards[3].rank + 3 == self.cards[4].rank + 2 == self.cards[5].rank + 1 == self.cards[6].rank) or (self.cards[3].rank == Rank.ACE and self.cards[4].rank == Rank.JACK and self.cards[5].rank == Rank.QUEEN and self.cards[6].rank == Rank.KING))
         run_5_7 = run_4_7 or self.cards[4].suit == self.cards[4].suit == self.cards[5].suit and ((self.cards[4].rank + 2 == self.cards[5].rank + 1 == self.cards[6].rank) or (self.cards[4].rank == Rank.ACE and self.cards[5].rank == Rank.QUEEN and self.cards[6].rank == Rank.KING))
 
-        print(run_1_3, run_1_4, run_4_7, run_5_7)
-
         if (run_1_3 and run_4_7) or (run_1_4 and run_5_7):
             return True
 
         if (run_1_3 and set_4_7) or (run_1_4 and set_5_7) or (set_1_3 and run_4_7) or (set_1_4 and run_5_7) or (set_1_3 and run_1_4) or (set_1_4 and run_1_3) or (set_4_7 and run_5_7) or (set_5_7 and run_4_7):
             return True
 
+        self.cards.sort()
         return False
 
     def discard(self, card):
@@ -145,39 +142,39 @@ class Hand:
 
 if __name__ == '__main__':
     deck = Deck()
-    #print(deck)
+    print(deck)
 
-    #hands = deck.deal(2)
-    #print(deck)
+    hands = deck.deal(2)
+    print(deck)
 
-    #for hand in hands:
-    #    print(hand)
+    for hand in hands:
+        print(hand)
 
-    #for _ in range(36):
-    #    hands[0].draw()
-    #    hands[0].discard(hands[0].cards[-2])
+    for _ in range(36):
+        hands[0].draw()
+        hands[0].discard(hands[0].cards[-2])
 
-    #print(deck)
-    #print(hands[0])
+    print(deck)
+    print(hands[0])
 
-    #hands[0].draw()
-    #hands[0].discard(hands[0].cards[-2])
+    hands[0].draw()
+    hands[0].discard(hands[0].cards[-2])
 
-    #print(deck)
-    #print(hands[0])
-    #hands[0].check_win()
+    print(deck)
+    print(hands[0])
+    hands[0].check_win()
 
-    hand = Hand(deck)
+    #hand = Hand(deck)
 
-    hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
-    hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
-    hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
-    hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
-    hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
-    hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
-    hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
+    #hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
 
-    hand.cards.sort()
+    #hand.cards.sort()
 
     print(hand.check_win())
 
