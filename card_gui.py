@@ -56,29 +56,29 @@ def card_suit(card_id):
     53: {'rank_code': ' ', 'suit_code': '_', 'rank': '__', 'suit': 'up_blocker'},
     54: {'rank_code': ' ', 'suit_code': '_', 'rank': '__', 'suit': 'down_blocker'},
     55: {'rank_code': '', 'suit_code': '\U0001F0A0', 'rank': ' x', 'suit': 'deck'},
+    56: {'rank_code': '|', 'suit_code': '?', 'rank': '? ', 'suit': 'unknown'},
 }  
     return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
 
-p1 = [0,1,2,3,4,5,6,12]
-p2 = [7,8,9,10,11,12,13,51]
-deck = [14,15,16,1,1,1,1,1,1,1]
-discard = [17,18,19]
-
-def card_shown(p1,p2,deck,discard):
+def card_shown(deck,discard,active,*players,**kw):
+    assert len(players) <= 7 
+    
     print("".join("=" for _ in range(60)))
     print(" The Gin - Interactive AI Card Game")
-    print("","".join("_" for _ in range((len(p1)*6)+10)))
-    print("|         "," ".join(card_suit(53)for _ in p1),"|")
-    print("|player 1:"," ".join(card_suit(i) for i in p1),"|")
-    print("|         "," ".join(card_suit(52)for _ in p1),"|")
-    print("","".join("-" for _ in range((len(p1)*6)+10)))
     
-    print("","".join("_" for _ in range((len(p2)*6)+10)))
-    print("|         "," ".join(card_suit(53)for _ in p2),"|")
-    print("|player 2:"," ".join(card_suit(i) for i in p2),"|")
-    print("|         "," ".join(card_suit(52)for _ in p2),"|")
-    print("","".join("-" for _ in range((len(p2)*6)+10)))
-    
+    for p, hand in enumerate(players, start=1):
+        print("","".join("_" for _ in range((len(hand)*6)+10)))
+        print("|         "," ".join(card_suit(53)for _ in hand),"|")
+        
+        if active == 0 or active == p:
+            print("|player %d:"%p," ".join(card_suit(i) for i in hand),"|")
+        else:
+            print("|player %d:"%p," ".join(card_suit(56) for _ in hand),"|")
+        
+        print("|         "," ".join(card_suit(52)for _ in hand),"|")
+        print("","".join("-" for _ in range((len(hand)*6)+10)))
+        
+
     print("")
     print(" deck:", "".join(card_suit(55)), str(len(deck)))
     print("           "," ".join(card_suit(53)for _ in discard))
@@ -88,7 +88,3 @@ def card_shown(p1,p2,deck,discard):
     
     action = input("Enter your action here:")
     print("".join("=" for _ in range(60)))
-
-    
-    
-card_shown(p1,p2,deck,discard)
