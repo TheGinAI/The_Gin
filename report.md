@@ -3,9 +3,34 @@
 ## Introduction
 
 ## Description
-In order to achieve our goal of training an agent to be able to interactively play against a human we will leverage
-several interesting Machine Learning tools, utilities and concepts. Those include **Python** with object oriented programming, **TensorFlow** learning and inference,
-**Reinforcement Learning** with multiple **Agents**, and data visualization using matplotlib and custom graphics displays. We will also make use of numpy for code optimization.
+The goal is to train a artificial neural network agent to be able to interactively play against a human.
+To achieve this we will leverage several interesting Machine Learning tools, utilities and concepts.
+Those include **Python** with object oriented programming, **TensorFlow** learning and inference,
+**Reinforcement Learning** with multiple **Agents**, and data visualization using matplotlib and custom 
+graphics displays. We will also make use of numpy for speed optimization.
+
+### Gin card game
+We have decided to train the artificial neural network to play Gin, this is because this card game has properties that play well
+with neural network models. Specifically, the number of observations and actions is always the same, which is a
+prerequisite for any artificial neural network. Besides this Gin also has a very clear win/loss condition,
+that does not leave any ambiguities as to how one got to a winning hand.
+
+The rules of Gin are as follows:
+1. Deck of cards with jokers removed is used (52 cards)
+2. Each player is dealt 7 cards
+3. One more card is drawn and placed face-up next to the deck
+4. The player left of the dealer goes first
+5. Player must pick either a face-down card from the deck, or a face-up card next to the deck
+6. Player must discard 1 card to the face-up pile next to the deck
+   - If a card was drawn from the face-up pile, then that same card can not immediately be discarded
+   - If a card was drawn from the face-down deck, it may be immediately discarded
+   - Otherwise, a card that is in the players hand at the start of their turn may be discarded
+   - At the end of their turn, the player must always have exactly 7 cards in their hand
+7. The first player to have one set or run of 3 cards and one set or run of 4 cards wins
+   - Valid set is when the player has 3 or 4 cards of the rank (and different suits), e.g. two of clubs, hearts, and spades
+   - Valid run is when the player has 3 or 4 cards in sequence of the same suit, e.g. two, three, and four of clubs
+   - Ace cards can either be counted as before 'two' or after 'king', wrapping around (e.g. king, ace, two) is not allowed
+   - Player indicates that they have won by discarding the card that is not part of their winning face-down on the discard pile
 
 ### Tools & Approach Discussion
 
@@ -16,7 +41,8 @@ there is no need to recompile the entire project, it is as simple as making the 
 to arrive at a working solution with less time spent waiting for the code to compile and more time actually analyzing the code and results.
 Another benefit is that for projects that build upon very complex concepts like machine learning, but do not necessarily need that much code
 because it is covered by libraries like TensorFlow, a easy to read high-level scripting language like Python allows to focus on the main problem at hand
-instead of various complicated syntax and programming structures.
+instead of various complicated syntax and programming structures. Python also has tools like matplotlib that make data visualization easy to add, and another tool
+called NumPy that allow leveraging the speed of C for processing intensive tasks which will help us get more training done in less time.
 
 #### Object Oriented Programming
 In order to effectively train a machine learning network, it is crucial to run as much data in parallel as possible. OOP helps make this easier
