@@ -1,11 +1,15 @@
 # The Gin - Interactive AI Card Game
 
 ## Introduction
-The goal of our project is to train an A.I. model using TensorFlow to play the best game of gin physically possible, so that we can observe the limits of current open-source learning model libraries -- which in our case is TensorFlow's Python library.  
+The goal of our project is to train a machine learning model (MLM) using TensorFlow to play the best game of gin physically possible, so that we can observe the limits of current open-source MLM libraries -- which in our case is TensorFlow's Python library.
+
+We are defining playing the best possible game of gin by balancing luck and skill, because in gin; you need four of your seven card to be exact in its number in order to win, but because of the seven cards in a hand being shuffled for randomness, it is possible for the MLM to draw a winning hand -- there by making it win by turn zero -- which means there was no action that took place for a win (reward), making that iteration of the 10,000 completly useless for training purposes. Escesnially, the best possible game for it to play is one where it doesn't at least win right of the bat, since it has to take a minumum number of actions for that iteration to yeild learning progression. 
+
+is one where the MLM makes the least amount of actions to a victory, but wasn't , and will consistantly reach 
 
 For many, the card game "gin" has little to do with strategy and more to do with the luck of the draw. With the nature of this project, we can solve this contingency while simultaneously running the risk of discovering never before seen strategies, defining what are the outlier environmental variables (starting hands/decks) and how they impacted the training process, demonstrating how a simple game can be used as the medium to support a complex deep learning network and simplifying the network for teaching/presentation purposes, finding what limitations there were (if any) with TensorFlow during the training phase of our model, and reaching an answer to if our methodology was truly the best (open-source) approach.
 
-Our approach will be done by setting up a set of parameters that our model will explore, with the hope that after 10,000 training iterations -- it can maintain a superhuman win rate which will be defined later on. The roadmap for this is simple: First, using Python we'll define the environment for the A.I. to train in. Next, we'll design two TF (TensorFlow) models to play gin against each other. Then through trial and error, remove/add/optimize the models learning parameters until they learn to play at our soon to be defined, "superhuman win rate". Finally, create support for a human to play one-on-one against our model to showcase its progress. 
+Our approach will be done by setting up a set of parameters that our model will explore, with the hope that after 10,000 training iterations -- it can maintain a superhuman win rate which will be defined later on. The roadmap for this is simple: First, using Python we will define the environment for the machine learning model to train in. Next is designing a TF (TensorFlow) model to play gin against a copy of itself. Then through trial and error, remove/add/optimize the models learning parameters until they learn to play at our soon to be defined, "superhuman win rate". Finally, create support for a human to play one-on-one against our model to showcase its progress. 
 
 ## Description
 The goal is to train a artificial neural network agent to be able to interactively play against a human.
