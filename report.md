@@ -1,6 +1,11 @@
 # The Gin - Interactive AI Card Game
 
 ## Introduction
+The goal of our project is to train an A.I. model using TensorFlow to play the best game of gin physically possible, so that we can observe the limits of current open-source learning model libraries -- which in our case is TensorFlow's Python library.  
+
+For many, the card game "gin" has little to do with strategy and more to do with the luck of the draw. With the nature of this project, we can solve this contingency while simultaneously running the risk of discovering never before seen strategies, defining what are the outlier environmental variables (starting hands/decks) and how they impacted the training process, demonstrating how a simple game can be used as the medium to support a complex deep learning network and simplifying the network for teaching/presentation purposes, finding what limitations there were (if any) with TensorFlow during the training phase of our model, and reaching an answer to if our methodology was truly the best (open-source) approach.
+
+Our approach will be done by setting up a set of parameters that our model will explore, with the hope that after 10,000 training iterations -- it can maintain a superhuman win rate which will be defined later on. The roadmap for this is simple: First, using Python we'll define the environment for the A.I. to train in. Next, we'll design two TF (TensorFlow) models to play gin against each other. Then through trial and error, remove/add/optimize the models learning parameters until they learn to play at our soon to be defined, "superhuman win rate". Finally, create support for a human to play one-on-one against our model to showcase its progress. 
 
 ## Description
 The goal is to train a artificial neural network agent to be able to interactively play against a human.
