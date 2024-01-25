@@ -27,34 +27,60 @@ class Rank(IntEnum):
 
 
 class Card:
+    __slots__ = ["__card_id", "__rank", "__suit"]
+
     def __init__(self, card_id):
-        self.card_id = card_id
-        self.rank, self.suit = self.to_rank_and_suit()
+        self.__card_id = card_id
 
-    def __str__(self):
-        return "{} OF {}".format(self.rank.name, self.suit.name)
-
-    def __eq__(self, other):
-        return self.card_id == other.card_id
-
-    def __lt__(self, other):
-        return self.card_id < other.card_id
-
-    def __add__(self, other):
-        assert type(other) is int, "Can only modify card values using ints"
-        return Card(self.card_id + other)
-
-    def __sub__(self, other):
-        assert type(other) is int, "Can only modify card values using ints"
-        return Card(self.card_id - other)
+        quotient, remainder = divmod(self.__card_id, 4)
+        self.__rank, self.__suit = Rank(quotient), Suit(remainder)
 
     @classmethod
     def from_rank_and_suit(cls, rank, suit):
         return cls(rank * 4 + suit)
 
-    def to_rank_and_suit(self):
-        quotient, remainder = divmod(self.card_id, 4)
-        return Rank(quotient), Suit(remainder)
+    @property
+    def card_id(self):
+        return self.__card_id
+
+    @property
+    def rank(self):
+        return self.__rank
+
+    @property
+    def suit(self):
+        return self.__suit
+
+    def __str__(self):
+        return "{} OF {}".format(self.__rank.name, self.__suit.name)
+
+    def __eq__(self, other):
+        assert isinstance(other, Card), "Can only compare Card to another Card"
+        return self.__card_id == other.__card_id
+
+    def __lt__(self, other):
+        assert isinstance(other, Card), "Can only compare Card to another Card"
+        return self.__card_id < other.__card_id
+
+    def __le__(self, other):
+        assert isinstance(other, Card), "Can only compare Card to another Card"
+        return self.__card_id <= other.__card_id
+
+    def __gt__(self, other):
+        assert isinstance(other, Card), "Can only compare Card to another Card"
+        return self.__card_id > other.__card_id
+
+    def __ge__(self, other):
+        assert isinstance(other, Card), "Can only compare Card to another Card"
+        return self.__card_id >= other.__card_id
+
+    def __add__(self, other):
+        assert type(other) is int, "Can only modify card values using ints"
+        return Card(self.__card_id + other)
+
+    def __sub__(self, other):
+        assert type(other) is int, "Can only modify card values using ints"
+        return Card(self.__card_id - other)
 
 
 class Deck:
@@ -174,7 +200,7 @@ if __name__ == '__main__':
 
     print(deck)
     print(hands[0])
-    hands[0].check_win()
+    print(hands[0].check_win())
 
     # hand = Hand(deck)
 
@@ -187,5 +213,3 @@ if __name__ == '__main__':
     # hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
 
     # hand.cards.sort()
-
-    print(hand.check_win())
