@@ -2,7 +2,7 @@ from enum import IntEnum
 from operator import attrgetter
 from random import shuffle
 
-
+#TEST
 class Suit(IntEnum):
     CLUBS = 0,
     DIAMONDS = 1,
