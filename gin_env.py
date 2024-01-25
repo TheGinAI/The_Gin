@@ -2,7 +2,7 @@ from enum import IntEnum
 from operator import attrgetter
 from random import shuffle
 
-#TEST
+
 class Suit(IntEnum):
     CLUBS = 0,
     DIAMONDS = 1,
@@ -28,27 +28,32 @@ class Rank(IntEnum):
 
 class Card:
     def __init__(self, card_id):
-        self.id = card_id
+        self.card_id = card_id
         self.rank, self.suit = self.to_rank_and_suit()
 
     def __str__(self):
         return "{} OF {}".format(self.rank.name, self.suit.name)
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.card_id == other.card_id
 
     def __lt__(self, other):
-        return self.id < other.id
+        return self.card_id < other.card_id
 
     def __add__(self, other):
-        return Card(self.id + other)
+        assert type(other) is int, "Can only modify card values using ints"
+        return Card(self.card_id + other)
+
+    def __sub__(self, other):
+        assert type(other) is int, "Can only modify card values using ints"
+        return Card(self.card_id - other)
 
     @classmethod
     def from_rank_and_suit(cls, rank, suit):
         return cls(rank * 4 + suit)
 
     def to_rank_and_suit(self):
-        quotient, remainder = divmod(self.id, 4)
+        quotient, remainder = divmod(self.card_id, 4)
         return Rank(quotient), Suit(remainder)
 
 
@@ -118,7 +123,8 @@ class Hand:
             return True
 
         # check runs
-        self.cards.sort(key=attrgetter("suit"))  # utilize stable sorting to maintain default rank ordering but prioritize suit order
+        self.cards.sort(key=attrgetter(
+            "suit"))  # utilize stable sorting to maintain default rank ordering but prioritize suit order
 
         run_1_4 = self.cards[0].suit == self.cards[1].suit == self.cards[2].suit == self.cards[3].suit and ((self.cards[0].rank + 3 == self.cards[1].rank + 2 == self.cards[2].rank + 1 == self.cards[3].rank) or (self.cards[0].rank == Rank.ACE and self.cards[1].rank == Rank.JACK and self.cards[2].rank == Rank.QUEEN and self.cards[3].rank == Rank.KING))
         run_1_3 = run_1_4 or self.cards[0].suit == self.cards[1].suit == self.cards[2].suit and ((self.cards[0].rank + 2 == self.cards[1].rank + 1 == self.cards[2].rank) or (self.cards[0].rank == Rank.ACE and self.cards[1].rank == Rank.QUEEN and self.cards[2].rank == Rank.KING))
@@ -129,7 +135,8 @@ class Hand:
         if (run_1_3 and run_4_7) or (run_1_4 and run_5_7):
             return True
 
-        if (run_1_3 and set_4_7) or (run_1_4 and set_5_7) or (set_1_3 and run_4_7) or (set_1_4 and run_5_7) or (set_1_3 and run_1_4) or (set_1_4 and run_1_3) or (set_4_7 and run_5_7) or (set_5_7 and run_4_7):
+        if (run_1_3 and set_4_7) or (run_1_4 and set_5_7) or (set_1_3 and run_4_7) or (set_1_4 and run_5_7) or (
+                set_1_3 and run_1_4) or (set_1_4 and run_1_3) or (set_4_7 and run_5_7) or (set_5_7 and run_4_7):
             return True
 
         self.cards.sort()
@@ -169,17 +176,16 @@ if __name__ == '__main__':
     print(hands[0])
     hands[0].check_win()
 
-    #hand = Hand(deck)
+    # hand = Hand(deck)
 
-    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
-    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
-    #hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
-    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
-    #hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
-    #hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
-    #hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
+    # hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
 
-    #hand.cards.sort()
+    # hand.cards.sort()
 
     print(hand.check_win())
-

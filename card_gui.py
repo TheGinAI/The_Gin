@@ -61,7 +61,7 @@ def card_suit(card_id):
     return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
 
 def card_shown(deck,discard,active,*players,**kw):
-    assert len(players) <= 7 
+    assert len(players) <= 7, "Gin can be played by at most 7 players"
     
     print("".join("=" for _ in range(60)))
     print(" The Gin - Interactive AI Card Game")
