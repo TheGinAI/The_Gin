@@ -30,6 +30,7 @@ class Card:
     __slots__ = ["__card_id", "__rank", "__suit"]
 
     def __init__(self, card_id):
+        assert type(card_id) is int, "card_id must be int"
         self.__card_id = card_id
 
         quotient, remainder = divmod(self.__card_id, 4)
@@ -56,6 +57,14 @@ class Card:
     def __str__(self):
         return "{} OF {}".format(self.__rank.name, self.__suit.name)
 
+    def __add__(self, other):
+        assert type(other) is int, "Can only modify card values using ints"
+        return Card(self.__card_id + other)
+
+    def __sub__(self, other):
+        assert type(other) is int, "Can only modify card values using ints"
+        return Card(self.__card_id - other)
+
     def __eq__(self, other):
         assert isinstance(other, Card), "Can only compare Card to another Card"
         return self.__card_id == other.__card_id
@@ -75,14 +84,6 @@ class Card:
     def __ge__(self, other):
         assert isinstance(other, Card), "Can only compare Card to another Card"
         return self.__card_id >= other.__card_id
-
-    def __add__(self, other):
-        assert type(other) is int, "Can only modify card values using ints"
-        return Card(self.__card_id + other)
-
-    def __sub__(self, other):
-        assert type(other) is int, "Can only modify card values using ints"
-        return Card(self.__card_id - other)
 
 
 class Deck:
