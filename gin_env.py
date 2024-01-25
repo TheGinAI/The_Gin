@@ -72,16 +72,21 @@ class Deck:
         return s
 
     def deal(self, hand_count):
-        hands = [Hand(self) for _ in range(hand_count)]
+        while True:
+            hands = [Hand(self) for _ in range(hand_count)]
 
-        for _ in range(7):
+            for _ in range(7):
+                for hand in hands:
+                    hand.draw()
+
             for hand in hands:
-                hand.draw()
+                hand.cards.sort()
 
-        for hand in hands:
-            hand.cards.sort()
+                # regenerate if a winning hand is dealt
+                if hand.check_win():
+                    continue
 
-        return hands
+            return hands
 
 
 class Hand:
