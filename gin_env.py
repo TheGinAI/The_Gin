@@ -40,7 +40,13 @@ class Card:
     def from_rank_and_suit(cls, rank, suit):
         assert Rank.__contains__(rank), "rank must be enum Rank (or int in range of Rank)"
         assert Suit.__contains__(suit), "suit must be enum Suit (or int in range of Suit)"
-        return cls(rank * 4 + suit)
+
+        card = super().__new__(cls)
+        card.__card_id = rank * 4 + suit
+        card.__rank = Rank(rank)
+        card.__suit = Suit(suit)
+
+        return card
 
     @property
     def card_id(self):
@@ -61,9 +67,21 @@ class Card:
         assert type(other) is int, "Can only modify card values using ints"
         return Card(self.__card_id + other)
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __iadd__(self, other):
+        raise AttributeError("May not modify card in place")
+
     def __sub__(self, other):
         assert type(other) is int, "Can only modify card values using ints"
         return Card(self.__card_id - other)
+
+    def __rsub__(self, other):
+        return self.__sub__(other)
+
+    def __isub__(self, other):
+        raise AttributeError("May not modify card in place")
 
     def __eq__(self, other):
         assert isinstance(other, Card), "Can only compare Card to another Card"
@@ -87,23 +105,33 @@ class Card:
 
 
 class Deck:
+    __slots__ = ["__draw_pile", "__discard_pile"]
+
     def __init__(self):
-        self.cards = [Card(x) for x in range(52)]
-        shuffle(self.cards)
-        self.discard = [self.cards.pop()]
+        self.__draw_pile = [Card(x) for x in range(52)]
+        shuffle(self.__draw_pile)
+        self.__discard_pile = [self.__draw_pile.pop()]
 
     def __str__(self):
         s = ""
 
         s += "Cards in deck:\n"
-        for card in self.cards:
+        for card in self.__draw_pile:
             s += card.__str__() + "\n"
 
         s += "\nCards in discard:\n"
-        for card in self.discard:
+        for card in self.__discard_pile:
             s += card.__str__() + "\n"
 
         return s
+
+    @property
+    def draw_pile(self):
+        return self.__draw_pile
+
+    @property
+    def discard_pile(self):
+        return self.__discard_pile
 
     def deal(self, hand_count):
         while True:
@@ -182,7 +210,23 @@ class Hand:
 
 
 if __name__ == '__main__':
+    c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
+    print(c)
+
+    c = 5 + Card(0)
     deck = Deck()
+
+    for card in deck.discard_pile:
+        print(card)
+    print("-----")
+
+    deck.discard_pile[0] = 2 + Card(0)
+
+    for card in deck.discard_pile:
+        print(card)
+    print("-----")
+
+    assert False
     print(deck)
 
     hands = deck.deal(2)
