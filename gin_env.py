@@ -37,6 +37,8 @@ class Card:
 
     @classmethod
     def from_rank_and_suit(cls, rank, suit):
+        assert Rank.__contains__(rank), "rank must be enum Rank (or int in range of Rank)"
+        assert Suit.__contains__(suit), "suit must be enum Suit (or int in range of Suit)"
         return cls(rank * 4 + suit)
 
     @property
