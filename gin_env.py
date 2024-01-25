@@ -129,65 +129,92 @@ class Deck:
     def draw_pile(self):
         return self.__draw_pile
 
+    @draw_pile.setter
+    def draw_pile(self, draw_pile):
+        self.__draw_pile = draw_pile
+
     @property
     def discard_pile(self):
         return self.__discard_pile
 
+    @discard_pile.setter
+    def discard_pile(self, discard_pile):
+        self.__discard_pile = discard_pile
+
     def deal(self, hand_count):
         while True:
-            hands = [Hand(self) for _ in range(hand_count)]
+            # create list of lists for cards of each hand
+            hands = [[] for _ in range(hand_count)]
 
+            # deal cards to the hands
             for _ in range(7):
                 for hand in hands:
-                    hand.draw()
+                    hand.append(self.__draw_pile.pop())
 
+            # sort the cards in each hand
             for hand in hands:
-                hand.cards.sort()
+                hand.sort()
 
-                # regenerate if a winning hand is dealt
-                if hand.check_win():
+            # convert lists into hands
+            hands = [Hand(self, hand) for hand in hands]
+
+            # regenerate if a winning hand was dealt
+            for hand in hands:
+                if hand.check():
                     continue
 
             return hands
 
 
 class Hand:
-    def __init__(self, deck):
-        self.deck = deck
-        self.cards = []
+    def __init__(self, deck, cards):
+        self.__deck = deck
+        self.__cards = cards
 
     def __str__(self):
         s = "Cards on hand:\n"
 
-        for card in self.cards:
+        for card in self.__cards:
             s += str(card) + "\n"
 
         return s
 
-    def draw(self):
-        self.cards.append(self.deck.cards.pop())
-        self.cards.sort()
+    def __len__(self):
+        return len(self.__cards)
 
-    def check_win(self):
+    def __getitem__(self, key):
+        return self.__cards[key]
+
+    def __iter__(self):
+        return iter(self.__cards)
+
+    def draw(self, down_or_up):
+        if down_or_up:  # True -> draw from face-up discard pile
+            self.__cards.append(self.__deck.discard_pile.pop())
+        else:           # False -> draw from face-down draw pile
+            self.__cards.append(self.__deck.draw_pile.pop())
+
+        self.__cards.sort()
+
+    def check(self):
         # check sets
-        set_1_4 = self.cards[0].rank == self.cards[1].rank == self.cards[2].rank == self.cards[3].rank
-        set_1_3 = set_1_4 or (self.cards[0].rank == self.cards[1].rank == self.cards[2].rank)
+        set_1_4 = self.__cards[0].rank == self.__cards[1].rank == self.__cards[2].rank == self.__cards[3].rank
+        set_1_3 = set_1_4 or (self.__cards[0].rank == self.__cards[1].rank == self.__cards[2].rank)
 
-        set_4_7 = self.cards[3].rank == self.cards[4].rank == self.cards[5].rank == self.cards[6].rank
-        set_5_7 = set_4_7 or (self.cards[4].rank == self.cards[5].rank == self.cards[6].rank)
+        set_4_7 = self.__cards[3].rank == self.__cards[4].rank == self.__cards[5].rank == self.__cards[6].rank
+        set_5_7 = set_4_7 or (self.__cards[4].rank == self.__cards[5].rank == self.__cards[6].rank)
 
         if (set_1_3 and set_4_7) or (set_1_4 and set_5_7):
             return True
 
         # check runs
-        self.cards.sort(key=attrgetter(
-            "suit"))  # utilize stable sorting to maintain default rank ordering but prioritize suit order
+        self.__cards.sort(key=attrgetter("suit"))  # utilize stable sorting to maintain default rank ordering but prioritize suit order
 
-        run_1_4 = self.cards[0].suit == self.cards[1].suit == self.cards[2].suit == self.cards[3].suit and ((self.cards[0].rank + 3 == self.cards[1].rank + 2 == self.cards[2].rank + 1 == self.cards[3].rank) or (self.cards[0].rank == Rank.ACE and self.cards[1].rank == Rank.JACK and self.cards[2].rank == Rank.QUEEN and self.cards[3].rank == Rank.KING))
-        run_1_3 = run_1_4 or self.cards[0].suit == self.cards[1].suit == self.cards[2].suit and ((self.cards[0].rank + 2 == self.cards[1].rank + 1 == self.cards[2].rank) or (self.cards[0].rank == Rank.ACE and self.cards[1].rank == Rank.QUEEN and self.cards[2].rank == Rank.KING))
+        run_1_4 = self.__cards[0].suit == self.__cards[1].suit == self.__cards[2].suit == self.__cards[3].suit and ((self.__cards[0].rank + 3 == self.__cards[1].rank + 2 == self.__cards[2].rank + 1 == self.__cards[3].rank) or (self.__cards[0].rank == Rank.ACE and self.__cards[1].rank == Rank.JACK and self.__cards[2].rank == Rank.QUEEN and self.__cards[3].rank == Rank.KING))
+        run_1_3 = run_1_4 or self.__cards[0].suit == self.__cards[1].suit == self.__cards[2].suit and ((self.__cards[0].rank + 2 == self.__cards[1].rank + 1 == self.__cards[2].rank) or (self.__cards[0].rank == Rank.ACE and self.__cards[1].rank == Rank.QUEEN and self.__cards[2].rank == Rank.KING))
 
-        run_4_7 = self.cards[3].suit == self.cards[4].suit == self.cards[5].suit == self.cards[6].suit and ((self.cards[3].rank + 3 == self.cards[4].rank + 2 == self.cards[5].rank + 1 == self.cards[6].rank) or (self.cards[3].rank == Rank.ACE and self.cards[4].rank == Rank.JACK and self.cards[5].rank == Rank.QUEEN and self.cards[6].rank == Rank.KING))
-        run_5_7 = run_4_7 or self.cards[4].suit == self.cards[4].suit == self.cards[5].suit and ((self.cards[4].rank + 2 == self.cards[5].rank + 1 == self.cards[6].rank) or (self.cards[4].rank == Rank.ACE and self.cards[5].rank == Rank.QUEEN and self.cards[6].rank == Rank.KING))
+        run_4_7 = self.__cards[3].suit == self.__cards[4].suit == self.__cards[5].suit == self.__cards[6].suit and ((self.__cards[3].rank + 3 == self.__cards[4].rank + 2 == self.__cards[5].rank + 1 == self.__cards[6].rank) or (self.__cards[3].rank == Rank.ACE and self.__cards[4].rank == Rank.JACK and self.__cards[5].rank == Rank.QUEEN and self.__cards[6].rank == Rank.KING))
+        run_5_7 = run_4_7 or self.__cards[4].suit == self.__cards[4].suit == self.__cards[5].suit and ((self.__cards[4].rank + 2 == self.__cards[5].rank + 1 == self.__cards[6].rank) or (self.__cards[4].rank == Rank.ACE and self.__cards[5].rank == Rank.QUEEN and self.__cards[6].rank == Rank.KING))
 
         if (run_1_3 and run_4_7) or (run_1_4 and run_5_7):
             return True
@@ -196,17 +223,16 @@ class Hand:
                 set_1_3 and run_1_4) or (set_1_4 and run_1_3) or (set_4_7 and run_5_7) or (set_5_7 and run_4_7):
             return True
 
-        self.cards.sort()
+        self.__cards.sort()
         return False
 
-    def discard(self, card):
-        self.cards.remove(card)  # raises error when does not have that card; good
-        self.deck.discard.append(card)
+    def discard(self, key):
+        self.__deck.discard_pile.append(self.__cards.pop(key))
 
-        if len(self.deck.cards) == 0:
-            self.deck.cards = self.deck.discard
-            shuffle(self.deck.cards)
-            self.deck.discard = [self.deck.cards.pop()]
+        if len(self.__deck.draw_pile) == 0:
+            self.__deck.draw_pile = self.__deck.discard_pile
+            shuffle(self.__deck.draw_pile)
+            self.__deck.discard_pile = [self.__deck.draw_pile.pop()]
 
 
 if __name__ == '__main__':
@@ -226,7 +252,7 @@ if __name__ == '__main__':
         print(card)
     print("-----")
 
-    assert False
+    #assert False
     print(deck)
 
     hands = deck.deal(2)
@@ -236,18 +262,18 @@ if __name__ == '__main__':
         print(hand)
 
     for _ in range(36):
-        hands[0].draw()
-        hands[0].discard(hands[0].cards[-2])
+        hands[0].draw(False)
+        hands[0].discard(-2)
 
     print(deck)
     print(hands[0])
 
-    hands[0].draw()
-    hands[0].discard(hands[0].cards[-2])
+    hands[0].draw(True)
+    hands[0].discard(-2)
 
     print(deck)
     print(hands[0])
-    print(hands[0].check_win())
+    print(hands[0].check())
 
     # hand = Hand(deck)
 
@@ -260,3 +286,11 @@ if __name__ == '__main__':
     # hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
 
     # hand.cards.sort()
+
+    print(hands[0])
+
+    for ca in hands[0]:
+        print(ca)
+        ca = Card(0)
+    print()
+    print(hands[0])
