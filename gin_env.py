@@ -112,6 +112,14 @@ class Deck:
         shuffle(self.__draw_pile)
         self.__discard_pile = [self.__draw_pile.pop()]
 
+    @property
+    def draw_pile(self):
+        return tuple(self.__draw_pile)
+
+    @property
+    def discard_pile(self):
+        return tuple(self.__discard_pile)
+
     def __str__(self):
         s = ""
 
@@ -124,22 +132,6 @@ class Deck:
             s += card.__str__() + "\n"
 
         return s
-
-    @property
-    def draw_pile(self):
-        return self.__draw_pile
-
-    @draw_pile.setter
-    def draw_pile(self, draw_pile):
-        self.__draw_pile = draw_pile
-
-    @property
-    def discard_pile(self):
-        return self.__discard_pile
-
-    @discard_pile.setter
-    def discard_pile(self, discard_pile):
-        self.__discard_pile = discard_pile
 
     def deal(self, hand_count):
         while True:
@@ -164,6 +156,20 @@ class Deck:
                     continue
 
             return hands
+
+    def draw_from_draw_pile(self):
+        return self.__draw_pile.pop()
+
+    def draw_from_discard_pile(self):
+        return self.__discard_pile.pop()
+
+    def add_to_discard_pile(self, card):
+        self.__discard_pile.append(card)
+
+        if len(self.__draw_pile) == 0:
+            self.__draw_pile = self.__discard_pile
+            shuffle(self.__draw_pile)
+            self.__discard_pile = [self.__draw_pile.pop()]
 
 
 class Hand:
@@ -190,9 +196,9 @@ class Hand:
 
     def draw(self, down_or_up):
         if down_or_up:  # True -> draw from face-up discard pile
-            self.__cards.append(self.__deck.discard_pile.pop())
+            self.__cards.append(self.__deck.draw_from_discard_pile())
         else:           # False -> draw from face-down draw pile
-            self.__cards.append(self.__deck.draw_pile.pop())
+            self.__cards.append(self.__deck.draw_from_draw_pile())
 
         self.__cards.sort()
 
@@ -227,12 +233,7 @@ class Hand:
         return False
 
     def discard(self, key):
-        self.__deck.discard_pile.append(self.__cards.pop(key))
-
-        if len(self.__deck.draw_pile) == 0:
-            self.__deck.draw_pile = self.__deck.discard_pile
-            shuffle(self.__deck.draw_pile)
-            self.__deck.discard_pile = [self.__deck.draw_pile.pop()]
+        self.__deck.add_to_discard_pile(self.__cards.pop(key))
 
 
 if __name__ == '__main__':
@@ -246,7 +247,7 @@ if __name__ == '__main__':
         print(card)
     print("-----")
 
-    deck.discard_pile[0] = 2 + Card(0)
+#    deck.discard_pile[0] = 2 + Card(0)
 
     for card in deck.discard_pile:
         print(card)
