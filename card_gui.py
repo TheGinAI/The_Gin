@@ -61,7 +61,7 @@ def card_suit(card_id):
     return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
 
 def card_shown(deck,discard,active,*players,**kw):
-    assert len(players) <= 7, "Gin can be played by at most 7 players"
+    assert len(players) <= 7 
     
     print("".join("=" for _ in range(60)))
     print(" The Gin - Interactive AI Card Game")
@@ -81,9 +81,9 @@ def card_shown(deck,discard,active,*players,**kw):
 
     print("")
     print(" deck:", "".join(card_suit(55)), str(len(deck)))
-    print("           "," ".join(card_suit(53)for _ in discard))
-    print(" discarded:"," ".join(card_suit(i) for i in discard))
-    print("           "," ".join(card_suit(52)for _ in discard),"".join(" " for _ in range(12)))
+    print("           "," ".join(card_suit(53)for _ in discard[-1:]))
+    print(" discarded:"," ".join(card_suit(i) for i in discard[-1:]),'- amount:',"".join(card_suit(55)), str(len(discard)))
+    print("           "," ".join(card_suit(52)for _ in discard[-1:]),"".join(" " for _ in range(12)))
     print("".join("=" for _ in range(60)))
     
     action = input("Enter your action here:")
