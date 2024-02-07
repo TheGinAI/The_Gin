@@ -60,7 +60,7 @@ def card_suit(card_id):
 }  
     return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
 
-def card_shown(deck,discard,active,*players,**kw):
+def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     assert len(players) <= 7 
     
     print("".join("=" for _ in range(60)))
@@ -80,11 +80,50 @@ def card_shown(deck,discard,active,*players,**kw):
         
 
     print("")
-    print(" deck:", "".join(card_suit(55)), str(len(deck)))
-    print("           "," ".join(card_suit(53)for _ in discard[-1:]))
-    print(" discarded:"," ".join(card_suit(i) for i in discard[-1:]),'- amount:',"".join(card_suit(55)), str(len(discard)))
-    print("           "," ".join(card_suit(52)for _ in discard[-1:]),"".join(" " for _ in range(12)))
+    print(" deck:", "".join(card_suit(55)), str(deck))
+    print("           "," ".join(card_suit(53)for _ in range(1)))
+    print(" discarded:"," ".join(card_suit(i) for i in [discard_card]),'- amount:',"".join(card_suit(55)), str(discard_amount))
+    print("           "," ".join(card_suit(52)for _ in range(1)),"".join(" " for _ in range(12)))
     print("".join("=" for _ in range(60)))
     
-    action = input("Enter your action here:")
-    print("".join("=" for _ in range(60)))
+#     print("".join("=" for _ in range(60)))
+
+def card_action(hand,action_code):
+    if action_code == 2:    
+        card_index = input("Enter index number of card you'd like to discard")
+        hand.discard(int(card_index)-1)
+    else:
+        draw_id = input("Which deck would you like to draw from, 1 for discarded and 2 for face-down deck")
+        draw_id = int(draw_id)
+        if draw_id == 1:
+            hand.draw(True)
+        else:
+            hand.draw(False)
+            
+def game_play(playeramount=2):
+    deck = Deck()
+    hands = deck.deal(playeramount)
+    
+    while True:
+        #P1 Action
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        print("Player 1 Action")
+        card_action(hands[0],1)
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        if hands[0].check == True:
+            break
+        print("Player 1 Action")
+        card_action(hands[0],2)
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        #P2 Action
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        print("Player 2 Action")
+        card_action(hands[1],1)
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        if hands[1].check == True:
+            break
+        print("Player 2 Action")
+        card_action(hands[1],2)
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        
+game_play(2)
