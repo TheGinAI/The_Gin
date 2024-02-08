@@ -1,8 +1,15 @@
 import numpy as np
 import tensorflow as tf
 
+from marl.replay_buffer import EfficientReplayBuffer
+
 tau = 0.01
 clip_norm = 0.5
+buff_size = 5
+obs_shape = (8,)
+act_shape = (8,)
+batch_size = 1
+decay = 0.95 # gamma
 
 
 class Agent:
@@ -14,6 +21,9 @@ class Agent:
         self.actor = ActorNetwork(self.critic)
         self.actor_target = ActorNetwork(self.critic)
         self.actor_target.model.set_weights(self.actor.model.get_weights())
+
+        self.replay_buffer = EfficientReplayBuffer(5, len(obs_shape),
+                                                   obs_shape, act_shape)
 
     def save(self, path):
         self.critic.model.save_weights(path + 'critic.h5', )
@@ -47,7 +57,22 @@ class Agent:
         self.actor_target.model.set_weights(new_weights)
 
     def update(self, agents, step):
+        obs_n, acts_n, rew_n, next_obs_n, done_n = self.replay_buffer.sample(batch_size)
+        weights = tf.ones(rew_n.shape)
 
+        # Train the critic, using the target actions in the target critic network, to determine the
+        # training target (i.e. target in MSE loss) for the critic update.
+        target_act_next = [a.target_action(obs) for a, obs in zip(agents, next_obs_n)]
+        target_q_next = self.critic_target.predict(next_obs_n, target_act_next)
+        q_train_target = rew_n[:, None] + decay * target_q_next
+
+        td_loss = self.critic.train(obs_n, acts_n, q_train_target, weights).numpy()[:, 0]
+
+        # Train the policy.
+        policy_loss = self.actor.train(obs_n, acts_n)
+
+        # Update target networks.
+        self.target_update()
 
 
 class ActorNetwork:
