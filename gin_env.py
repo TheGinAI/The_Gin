@@ -120,6 +120,10 @@ class Deck:
     def discard_pile(self):
         return tuple(self.__discard_pile)
 
+    @property
+    def discard_pile_top(self):
+        return self.__discard_pile[-1]
+
     def __str__(self):
         s = ""
 
