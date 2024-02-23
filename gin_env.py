@@ -203,12 +203,12 @@ class Hand:
     def __iter__(self):
         return iter(self.__cards)
 
-    def draw(self, down_or_up):
-        if down_or_up:  # True -> draw from face-up discard pile
-            self.__cards.append(self.__deck.draw_from_discard_pile())
-        else:           # False -> draw from face-down draw pile
-            self.__cards.append(self.__deck.draw_from_draw_pile())
+    def draw_from_draw_pile(self):
+        self.__cards.append(self.__deck.draw_from_draw_pile())
+        self.__cards.sort()
 
+    def draw_from_discard_pile(self):
+        self.__cards.append(self.__deck.draw_from_discard_pile())
         self.__cards.sort()
 
     def check(self):
