@@ -122,7 +122,10 @@ class Deck:
 
     @property
     def discard_pile_top(self):
-        return self.__discard_pile[-1]
+        try:
+            return self.__discard_pile[-1]
+        except IndexError:
+            return None
 
     def __str__(self):
         s = ""
@@ -177,6 +180,8 @@ class Deck:
 
 
 class Hand:
+    __slots__ = ["__deck", "__cards"]
+
     def __init__(self, deck, cards):
         self.__deck = deck
         self.__cards = cards
