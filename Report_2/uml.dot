@@ -1,0 +1,290 @@
+digraph UML_Class_diagram {
+	graph [
+		label="UML Class Diagram of The Gin"
+		labelloc="t"
+		fontname="Helvetica,Arial,sans-serif"
+		rankdir="LR"
+	]
+	node [
+		fontname="Helvetica,Arial,sans-serif"
+		shape=record
+		style=filled
+		fillcolor=gray95
+	]
+
+	Class_Deck [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>Deck</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left">+ draw_pile: Tuple«Card, ...»</td> </tr>
+					<tr> <td align="left">+ discard_pile: Tuple«Card, ...»</td> </tr>
+					<tr> <td align="left">+ discard_pile_top: Card</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >+ deal(player_count: int): List«Hand, ...»</td> </tr>
+					<tr> <td align="left" >+ draw_from_draw_pile(): Card</td> </tr>
+					<tr> <td align="left" >+ draw_from_discard_pile(): Card</td> </tr>
+					<tr> <td align="left" >+ add_to_discard_pile(card: Card): void</td> </tr>
+					<tr> <td align="left" >+ __str__()</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Hand [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>Hand</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" port="chd">- deck</td> </tr>
+					<tr> <td align="left" port="chc">- cards</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >+ draw_from_draw_pile(): void</td> </tr>
+					<tr> <td align="left" >+ draw_from_discard_pile(): void</td> </tr>
+					<tr> <td align="left" >+ check(): bool</td> </tr>
+					<tr> <td align="left" >+ discard(key: int): void</td> </tr>
+					<tr> <td align="left" >+ __str__()</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Interface_List [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>«interface»<br/>Read-only List</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ __len__(): int</td> </tr>
+					<tr> <td align="left" >+ __iter__(): generator«item»</td> </tr>
+					<tr> <td align="left" >+ __getitem__(key: int): item</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Card [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>Card</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >+ card_id: int</td> </tr>
+					<tr> <td align="left" port="ccer">+ rank: Rank</td> </tr>
+					<tr> <td align="left" port="cces">+ suit: Suit</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ __str__()</td> </tr>
+					<tr> <td align="left" >+ __comparators__()</td> </tr>
+					<tr> <td align="left" >+ __arithmetic__()</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Enum_Suit [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>«enumeration»<br/>Suit</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >Clubs</td> </tr>
+					<tr> <td align="left" >Diamonds</td> </tr>
+					<tr> <td align="left" >Hearts</td> </tr>
+					<tr> <td align="left" >Spades</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Enum_Rank [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>«enumeration»<br/>Rank</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >Ace</td> </tr>
+					<tr> <td align="left" >Two</td> </tr>
+					<tr> <td align="left" >Three</td> </tr>
+					<tr> <td align="left" >Four</td> </tr>
+					<tr> <td align="left" >Five</td> </tr>
+					<tr> <td align="left" >Six</td> </tr>
+					<tr> <td align="left" >Seven</td> </tr>
+					<tr> <td align="left" >Eight</td> </tr>
+					<tr> <td align="left" >Nine</td> </tr>
+					<tr> <td align="left" >Ten</td> </tr>
+					<tr> <td align="left" >Jack</td> </tr>
+					<tr> <td align="left" >Queen</td> </tr>
+					<tr> <td align="left" >King</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Agent [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>Agent</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" port="caa">- actor</td> </tr>
+					<tr> <td align="left" port="caat">- actor_target</td> </tr>
+				    <tr> <td align="left" port="cac">- critic</td> </tr>
+					<tr> <td align="left" port="cact">- critic_target</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ save(path: String): void</td> </tr>
+					<tr> <td align="left" >+ load(path: String): void</td> </tr>
+				    <tr> <td align="left" >+ predict(observation: Array): Array</td> </tr>
+					<tr> <td align="left" >+ target_predict(observation: Array): Array</td> </tr>
+				    <tr> <td align="left" >+ update(adversaries: Array«Agent»): void</td> </tr>
+					<tr> <td align="left" >+ target_update(): void</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Actor [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>Actor</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >- model</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ predict(observation: Array): Array</td> </tr>
+					<tr> <td align="left" >+ train(observation: Array): float</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Actor_Target [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>ActorTarget</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >- model</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ predict(observation: Array): Array</td> </tr>
+					<tr> <td align="left" >+ train(observation: Array): float</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Critic [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>Critic</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >- model</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ predict(observation: Array, action: Array): float</td> </tr>
+					<tr> <td align="left" >+ train(observation: Array, action: Array, target_loss: float, weights: Array): float</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Critic_Target [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>CriticTarget</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >- model</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" >+ predict(observation: Array, action: Array): float</td> </tr>
+					<tr> <td align="left" >+ train(observation: Array, action: Array, target_loss: float, weights: Array): float</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Train_Env [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>AutoTrainEnvironment</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" port="cted">- deck</td> </tr>
+				    <tr> <td align="left" port="cteh">- hands</td> </tr>
+				    <tr> <td align="left" port="ctea">- agents</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >+ train(): void</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Human_Env [
+		shape=plain
+		label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr> <td> <b>HumanPlayEnvironment</b> </td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+				    <tr> <td align="left" port="ched">- deck</td> </tr>
+				    <tr> <td align="left" port="cheh">- hands</td> </tr>
+				    <tr> <td align="left" port="chea">- agents</td> </tr>
+				</table>
+			</td> </tr>
+			<tr> <td>
+				<table border="0" cellborder="0" cellspacing="0" >
+					<tr> <td align="left" >+ human_action(): void</td> </tr>
+					<tr> <td align="left" >+ environment_action(): void</td> </tr>
+					<tr> <td align="left" >+ render(): void</td> </tr>
+				</table>
+			</td> </tr>
+		</table>>
+	]
+
+	Class_Card:cces -> Enum_Suit;
+	Class_Card:ccer -> Enum_Rank;
+	Class_Hand:chc -> Class_Card;
+	Class_Hand:chd -> Class_Deck;
+
+	edge [dir=forward arrowhead=empty arrowtail=empty style=dashed]
+	Class_Hand -> Interface_List;
+
+    edge [dir=forward arrowhead=diamond arrowtail=empty style=solid]
+	Class_Agent:caa -> Class_Actor [headlabel="1", taillabel="1"]
+	Class_Agent:caat -> Class_Actor_Target [headlabel="1", taillabel="1"]
+	Class_Agent:cac -> Class_Critic [headlabel="1", taillabel="1"]
+	Class_Agent:cact -> Class_Critic_Target [headlabel="1", taillabel="1"]
+	Class_Train_Env:ctea -> Class_Agent [headlabel="N   ", taillabel="1"]
+	Class_Train_Env:cted -> Class_Deck [headlabel="1", taillabel="1"]
+	Class_Train_Env:cteh -> Class_Hand [headlabel="1", taillabel="1"]
+	Class_Human_Env:chea -> Class_Agent [headlabel="N   ", taillabel="1"]
+	Class_Human_Env:ched -> Class_Deck [headlabel="1", taillabel="1"]
+	Class_Human_Env:cheh -> Class_Hand [headlabel="1", taillabel="1"]
+}
