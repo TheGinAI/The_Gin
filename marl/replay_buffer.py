@@ -16,9 +16,9 @@ class EfficientReplayBuffer(object):
         self._obs_tp1_n = []
         self._n_agents = n_agents
         for idx in range(n_agents):
-            self._obs_n.append(np.empty([size, obs_shape_n[idx, 0]], dtype=np.float32))
-            self._acts_n.append(np.empty([size, act_shape_n[idx][0]], dtype=np.float32))
-            self._obs_tp1_n.append(np.empty([size, obs_shape_n[idx,0]], dtype=np.float32))
+            self._obs_n.append(np.empty([size, obs_shape_n], dtype=np.float32))
+            self._acts_n.append(np.empty([size, act_shape_n], dtype=np.float32))
+            self._obs_tp1_n.append(np.empty([size, obs_shape_n], dtype=np.float32))
         self._done = np.empty([size], dtype=np.float32)
         self._reward = np.empty([size], dtype=np.float32)
         self._maxsize = size

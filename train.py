@@ -103,8 +103,11 @@ def train():
             logger.experiment_end()
             return logger.get_sacred_results()
 
+
 if __name__ == '__main__':
     deck = Deck()
     hands = deck.deal(2)
     agents = [MADDPGAgent(), MADDPGAgent()]
+
+    print(agents[0].predict([[1, 1, 1, 1, 1, 1, 1, 1]]))
 

@@ -9,7 +9,9 @@ buff_size = 5
 obs_shape = (8,)
 act_shape = (8,)
 batch_size = 1
-decay = 0.95 # gamma
+decay = 0.95  # gamma
+max_transition_experience = 100
+total_num_agents = 2
 
 
 class Agent:
@@ -22,8 +24,7 @@ class Agent:
         self.actor_target = ActorNetwork(self.critic)
         self.actor_target.model.set_weights(self.actor.model.get_weights())
 
-        self.replay_buffer = EfficientReplayBuffer(5, len(obs_shape),
-                                                   obs_shape, act_shape)
+        self.replay_buffer = EfficientReplayBuffer(max_transition_experience, total_num_agents, obs_shape[0], act_shape[0])
 
     def save(self, path):
         self.critic.model.save_weights(path + 'critic.h5', )
@@ -78,15 +79,15 @@ class Agent:
 class ActorNetwork:
     def __init__(self, critic_network):
         self.critic_network = critic_network
-        self.optimizer = tf.keras.optimizers.Adam(lr=1e-4)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
 
-        self.input_layer = tf.keras.layers.Input(shape=(7,), dtype=tf.int8)
+        self.input_layer = tf.keras.layers.Input(shape=obs_shape, dtype=tf.int8)
 
         self.hidden_layers = []
         self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
         self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
 
-        self.output_layer = tf.keras.layers.Dense(5, activation="softmax")
+        self.output_layer = tf.keras.layers.Dense(act_shape[0], activation="softmax")
 
         self.model = tf.keras.Sequential()
         self.model.add(self.input_layer)
@@ -95,7 +96,7 @@ class ActorNetwork:
         self.model.add(self.output_layer)
 
     def predict(self, obs):
-        return self.model(obs, training=False)
+        return self.model(tf.convert_to_tensor(obs), training=False)
 
     @tf.function
     def train(self, obs):
@@ -123,11 +124,9 @@ class CriticNetwork:
     Also known as Q-Network
     """
     def __init__(self):
-        self.optimizer = tf.keras.optimizers.Adam(lr=1e-4)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
 
-        self.obs_input_layer = tf.keras.layers.Input(shape=(7,), dtype=tf.int8)
-        self.act_input_layer = tf.keras.layers.Input(shape=(7,), dtype=tf.int8)
-        self.input_layer = tf.keras.layers.Concatenate()([self.obs_input_layer, self.act_input_layer])
+        self.input_layer = tf.keras.layers.Input(shape=(obs_shape[0] + act_shape[0],), dtype=tf.int8)
 
         self.hidden_layers = []
         self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
