@@ -68,6 +68,7 @@ def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     
     for p, hand in enumerate(players, start=1):
         print("","".join("_" for _ in range((len(hand)*6)+10)))
+#         print("|           ","     ".join(str(i) for i in range(len(hand))),"  |")
         print("|         "," ".join(card_suit(53)for _ in hand),"|")
         
         if active == 0 or active == p:
@@ -76,6 +77,7 @@ def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
             print("|player %d:"%p," ".join(card_suit(56) for _ in hand),"|")
         
         print("|         "," ".join(card_suit(52)for _ in hand),"|")
+        print("|           ","     ".join(str(i+1) for i in range(len(hand))),"  |")
         print("","".join("-" for _ in range((len(hand)*6)+10)))
         
 
@@ -88,17 +90,21 @@ def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     
 #     print("".join("=" for _ in range(60)))
 
-def card_action(hand,action_code):
+def card_action(hand,action_code,deck):
+    card_drawn_x = 'Null'
     if action_code == 2:    
-        card_index = input("Enter index number of card you'd like to discard")
+        card_index = input("Enter index number of card you'd like to discard: ")
         hand.discard(int(card_index)-1)
     else:
-        draw_id = input("Which deck would you like to draw from, 1 for discarded and 2 for face-down deck")
+        draw_id = input("Which deck would you like to draw from, 1 for discarded and 2 for face-down deck: ")
         draw_id = int(draw_id)
         if draw_id == 1:
+            card_drawn_x = deck.discard_pile_top
             hand.draw(True)
         else:
+            card_drawn_x = deck.draw_pile[-1]
             hand.draw(False)
+    return card_drawn_x
             
 def game_play(playeramount=2):
     deck = Deck()
@@ -106,24 +112,97 @@ def game_play(playeramount=2):
     
     while True:
         #P1 Action
+        os.system('clear')
         card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
         print("Player 1 Action")
-        card_action(hands[0],1)
+        card_drawn = card_action(hands[0],1,deck)
+        os.system('clear')
+        print("".join("=" for _ in range(60)))
+        print("*You've drawn:",card_drawn)
         card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
         if hands[0].check == True:
+            print("Player 1 Won")
             break
         print("Player 1 Action")
-        card_action(hands[0],2)
-        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
-        #P2 Action
-        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
-        print("Player 2 Action")
-        card_action(hands[1],1)
+        card_drawn = card_action(hands[0],2,deck)
+        os.system('clear')
         card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
         if hands[1].check == True:
+            print("Player 1 Won")
+            break
+        #P2 Action
+        os.system('clear')
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        print("Player 2 Action")
+        card_drawn = card_action(hands[1],1,deck)
+        os.system('clear')
+        print("".join("=" for _ in range(60)))
+        print("*You've drawn:",card_drawn)
+        card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        if hands[1].check == True:
+            print("Player 2 Won")
             break
         print("Player 2 Action")
-        card_action(hands[1],2)
+        card_drawn = card_action(hands[1],2,deck)
+        os.system('clear')
         card_shown(len(deck.draw_pile),deck.discard_pile_top.card_id,len(deck.discard_pile),0,[card.card_id for card in hands[0]],[card.card_id for card in hands[1]])
+        if hands[1].check == True:
+            print("Player 2 Won")
+            break
+
+def init_UI():
+    print("".join("=" for _ in range(62)))
+    print("".join("-" for _ in range(62)))
+    print("""
+     ████████╗██╗  ██╗███████╗     ██████╗ ██╗███╗   ██╗
+     ╚══██╔══╝██║  ██║██╔════╝    ██╔════╝ ██║████╗  ██║
+        ██║   ███████║█████╗      ██║  ███╗██║██╔██╗ ██║
+        ██║   ██╔══██║██╔══╝      ██║   ██║██║██║╚██╗██║
+        ██║   ██║  ██║███████╗    ╚██████╔╝██║██║ ╚████║
+        ╚═╝   ╚═╝  ╚═╝╚══════╝     ╚═════╝ ╚═╝╚═╝  ╚═══╝
+   """)
+    print("".join("-" for _ in range(62)))
+    print("".join("=" for _ in range(62)))
+    print("")
+    print("".join("-" for _ in range(18)),"Interactive AI Card Game","".join("-" for _ in range(18)))
+    print("")
+    print("---------------------Pick Your Game Mode---------------------")
+    print("")
+    print("--------------[1: Single Player 2: Two Player]----------------")
+    print("")
+    print("".join("=" for _ in range(62)))
+    mode = input("")
+    
+    os.system("clear")
+    
+    print("".join("=" for _ in range(62)))
+    print("".join("-" for _ in range(62)))
+    print("""
+     ████████╗██╗  ██╗███████╗     ██████╗ ██╗███╗   ██╗
+     ╚══██╔══╝██║  ██║██╔════╝    ██╔════╝ ██║████╗  ██║
+        ██║   ███████║█████╗      ██║  ███╗██║██╔██╗ ██║
+        ██║   ██╔══██║██╔══╝      ██║   ██║██║██║╚██╗██║
+        ██║   ██║  ██║███████╗    ╚██████╔╝██║██║ ╚████║
+        ╚═╝   ╚═╝  ╚═╝╚══════╝     ╚═════╝ ╚═╝╚═╝  ╚═══╝
+   """)
+    print("".join("-" for _ in range(62)))
+    print("".join("=" for _ in range(62)))
+    print("")
+    print("".join("-" for _ in range(18)),"Interactive AI Card Game","".join("-" for _ in range(18)))
+    print("")
+    print("--------------------------------------------------------------")
+    print("")
+    print("--------------[Enter Any Key to Start The Game]---------------")
+    print("")
+    print("".join("=" for _ in range(62)))
+    input("")
+    
+    
+    if mode == "1":
+        os.system("clear")
+        game_play(2)
+    elif mode == "2":
+        os.system("clear")
+        game_play(3)
         
-game_play(2)
+init_UI()
