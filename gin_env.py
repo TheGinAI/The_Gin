@@ -1,4 +1,5 @@
 from enum import IntEnum
+from itertools import combinations
 from operator import attrgetter
 from random import shuffle
 
@@ -245,7 +246,120 @@ class Hand:
         self.__deck.add_to_discard_pile(self.__cards.pop(key))
 
 
+def set_4(ihand):
+    ihand = ihand[:]
+    hands = combinations(ihand, 4)
+
+    for hand in hands:
+        if hand[0].rank == hand[1].rank == hand[2].rank == hand[3].rank:
+            ihand.remove(hand[0])
+            ihand.remove(hand[1])
+            ihand.remove(hand[2])
+            ihand.remove(hand[3])
+
+            return ihand
+    return ihand
+
+
+def set_3(ihand):
+    ihand = ihand[:]
+    hands = combinations(ihand, 3)
+
+    for hand in hands:
+        if hand[0].rank == hand[1].rank == hand[2].rank:
+            ihand.remove(hand[0])
+            ihand.remove(hand[1])
+            ihand.remove(hand[2])
+
+            return ihand
+    return ihand
+
+
+def run_4(ihand):
+    ihand = ihand[:]
+    hands = combinations(ihand, 4)
+
+    for hand in hands:
+        if hand[0].suit == hand[1].suit == hand[2].suit == hand[3].suit and (hand[0].rank + 3 == hand[1].rank + 2 == hand[2].rank + 1 == hand[3].rank or (hand[0].rank == Rank.ACE and hand[1].rank == Rank.JACK and hand[2].rank == Rank.QUEEN and hand[3].rank == Rank.KING)):
+            ihand.remove(hand[0])
+            ihand.remove(hand[1])
+            ihand.remove(hand[2])
+            ihand.remove(hand[3])
+
+            return ihand
+    return ihand
+
+
+def run_3(ihand):
+    ihand = ihand[:]
+    hands = combinations(ihand, 3)
+
+    for hand in hands:
+        if hand[0].suit == hand[1].suit == hand[2].suit and (hand[0].rank + 2 == hand[1].rank + 1 == hand[2].rank or (hand[0].rank == Rank.ACE and hand[1].rank == Rank.QUEEN and hand[2].rank == Rank.KING)):
+            ihand.remove(hand[0])
+            ihand.remove(hand[1])
+            ihand.remove(hand[2])
+
+            return ihand
+    return ihand
+
+
+def is_win(hand):
+    len_win = len(hand) - 7
+    hand = list(hand)
+
+    return (
+            len(set_4(set_3(hand))) == len_win or
+            len(set_3(set_4(hand))) == len_win or
+
+            len(run_4(run_3(hand))) == len_win or
+            len(run_3(run_4(hand))) == len_win or
+
+            len(set_4(run_3(hand))) == len_win or
+            len(set_3(run_4(hand))) == len_win or
+
+            len(run_4(set_3(hand))) == len_win or
+            len(run_3(set_4(hand))) == len_win
+    )
+
+
 if __name__ == '__main__':
+    # hand = [
+    #     Card.from_rank_and_suit(Rank.QUEEN, Suit.CLUBS),
+    #     Card.from_rank_and_suit(Rank.KING, Suit.CLUBS),
+    #     Card.from_rank_and_suit(Rank.ACE, Suit.CLUBS),
+    #     Card.from_rank_and_suit(Rank.JACK, Suit.CLUBS),
+    #     Card.from_rank_and_suit(Rank.THREE, Suit.DIAMONDS),
+    #     Card.from_rank_and_suit(Rank.THREE, Suit.HEARTS),
+    #     Card.from_rank_and_suit(Rank.THREE, Suit.SPADES),
+    #     Card.from_rank_and_suit(Rank.THREE, Suit.CLUBS)
+    # ]
+    #
+    # hand.sort()
+    #
+    # print(is_win(hand))
+    # for card in hand:
+    #     print(card)
+
+    nt = 0
+    nw = 0
+    for hand in combinations([Card(x) for x in range(52)], 8):
+        if is_win(hand):
+            nw += 1
+        nt += 1
+
+        if nt % 1000 == 0:
+            print(nt, nw, nw/nt)
+
+            # for card in hand:
+            #     print(card)
+            # print("=" * 16)
+
+
+
+
+    raise Exception("B")
+
     c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
     print(c)
 
@@ -297,7 +411,6 @@ if __name__ == '__main__':
 
     # hand.cards.sort()
 
-    print(hands[0])
 
     for ca in hands[0]:
         print(ca)
