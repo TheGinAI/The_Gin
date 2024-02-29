@@ -105,9 +105,11 @@ def train():
 
 
 if __name__ == '__main__':
+    agents = [MADDPGAgent(), MADDPGAgent()]
+
     deck = Deck()
     hands = deck.deal(2)
-    agents = [MADDPGAgent(), MADDPGAgent()]
+
 
     print(agents[0].predict([[1, 1, 1, 1, 1, 1, 1, 1]]))
 
