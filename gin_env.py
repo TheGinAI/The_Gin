@@ -1,5 +1,7 @@
+import time
 from enum import IntEnum
 from itertools import combinations
+from multiprocessing import Pool
 from operator import attrgetter
 from random import shuffle
 
@@ -324,32 +326,20 @@ def is_win(hand):
 
 
 if __name__ == '__main__':
-    # hand = [
-    #     Card.from_rank_and_suit(Rank.QUEEN, Suit.CLUBS),
-    #     Card.from_rank_and_suit(Rank.KING, Suit.CLUBS),
-    #     Card.from_rank_and_suit(Rank.ACE, Suit.CLUBS),
-    #     Card.from_rank_and_suit(Rank.JACK, Suit.CLUBS),
-    #     Card.from_rank_and_suit(Rank.THREE, Suit.DIAMONDS),
-    #     Card.from_rank_and_suit(Rank.THREE, Suit.HEARTS),
-    #     Card.from_rank_and_suit(Rank.THREE, Suit.SPADES),
-    #     Card.from_rank_and_suit(Rank.THREE, Suit.CLUBS)
-    # ]
-    #
-    # hand.sort()
-    #
-    # print(is_win(hand))
-    # for card in hand:
-    #     print(card)
+    pool = Pool()
 
+    res = pool.imap(is_win, combinations([Card(x) for x in range(52)], 8), chunksize=131072)
+
+    start = time.time()
     nt = 0
     nw = 0
-    for hand in combinations([Card(x) for x in range(52)], 8):
-        if is_win(hand):
+    for win in res:
+        if win:
             nw += 1
         nt += 1
 
-        if nt % 1000 == 0:
-            print(nt, nw, nw/nt)
+        if not nt % 1000000:
+            print(time.time() - start, nt, nw, nw/nt)
 
             # for card in hand:
             #     print(card)
