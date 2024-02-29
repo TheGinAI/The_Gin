@@ -241,7 +241,6 @@ class Hand:
 if __name__ == '__main__':
     deck = Deck()
     hands = deck.deal(2)
-
     print(hands[0])
     print(hands[0].charcode, hands[0].check())
 

@@ -1,12 +1,13 @@
 import linecache
 import random
 import sys
+import time
 from itertools import combinations
 from multiprocessing import Pool
 
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
-from gin_env import Card, Rank
+from gin_env import Deck, Card, Rank, win_lookup
 
 
 def set_4(ihand):
@@ -122,6 +123,27 @@ if __name__ == '__main__':
 
         for card in in_is_win(linecache.getline("util/bruteforce.txt", random.randint(0, lc)).rstrip()):
             print(card)
+
+    elif sys.argv[1] == "bench":
+        n = 10_000
+
+        start = time.time()
+        for _ in range(n):
+            deck = Deck()
+            hands = deck.deal(2)
+            t = hands[0] in win_lookup
+        lookup_t = time.time() - start
+
+        start = time.time()
+        for _ in range(n):
+            deck = Deck()
+            hands = deck.deal(2)
+            t = is_win(hands[0])
+        compute_t = time.time() - start
+
+        print("Compute:", round(n / compute_t), "checks/s")
+        print("Lookup:", round(n / lookup_t), "checks/s")
+
 
     else:
         print("Invalid argument, use gen, load, or check")
