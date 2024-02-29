@@ -239,70 +239,76 @@ class Hand:
 
 
 if __name__ == '__main__':
-    card = Card.from_rank_and_suit(Rank.KING, Suit.DIAMONDS)
-    print(card)
-
-    charcode = card.charcode
-    print(charcode)
-
-    print(card.from_charcode(charcode))
-
-    # raise Exception("B")
-
-    # c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
-    # print(c)
-
-    # c = 5 + Card(0)
     deck = Deck()
-
-    for card in deck.discard_pile:
-        print(card)
-    print("-----")
-
-#    deck.discard_pile[0] = 2 + Card(0)
-
-    for card in deck.discard_pile:
-        print(card)
-    print("-----")
-
-    #assert False
-    print(deck)
-
     hands = deck.deal(2)
-    print(deck)
 
-    for hand in hands:
-        print(hand, hand.charcode, hand.check())
-
-    for _ in range(36):
-        hands[0].draw(False)
-        hands[0].discard(-2)
-
-    print(deck)
     print(hands[0])
+    print(hands[0].charcode, hands[0].check())
 
-    hands[0].draw(True)
-    hands[0].discard(-2)
-
-    print(deck)
-    print(hands[0])
-    print(hands[0].check())
-
-    # hand = Hand(deck)
-
-    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
-    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
-    # hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
-    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
-    # hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
-    # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
-    # hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
-
-    # hand.cards.sort()
-
-
-    for ca in hands[0]:
-        print(ca)
-        ca = Card(0)
-    print()
-    print(hands[0])
+#     card = Card.from_rank_and_suit(Rank.KING, Suit.DIAMONDS)
+#     print(card)
+#
+#     charcode = card.charcode
+#     print(charcode)
+#
+#     print(card.from_charcode(charcode))
+#
+#     # raise Exception("B")
+#
+#     # c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
+#     # print(c)
+#
+#     # c = 5 + Card(0)
+#     deck = Deck()
+#
+#     for card in deck.discard_pile:
+#         print(card)
+#     print("-----")
+#
+# #    deck.discard_pile[0] = 2 + Card(0)
+#
+#     for card in deck.discard_pile:
+#         print(card)
+#     print("-----")
+#
+#     #assert False
+#     print(deck)
+#
+#     hands = deck.deal(2)
+#     print(deck)
+#
+#     for hand in hands:
+#         print(hand, hand.charcode, hand.check())
+#
+#     for _ in range(36):
+#         hands[0].draw(False)
+#         hands[0].discard(-2)
+#
+#     print(deck)
+#     print(hands[0])
+#
+#     hands[0].draw(True)
+#     hands[0].discard(-2)
+#
+#     print(deck)
+#     print(hands[0])
+#     print(hands[0].check())
+#
+#     # hand = Hand(deck)
+#
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
+#     # hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
+#
+#     # hand.cards.sort()
+#
+#
+#     for ca in hands[0]:
+#         print(ca)
+#         ca = Card(0)
+#     print()
+#     print(hands[0])
