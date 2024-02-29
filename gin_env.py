@@ -3,6 +3,13 @@ from operator import attrgetter
 from random import shuffle
 
 
+win_lookup = set()
+
+with open("util/bruteforce.txt", "r") as f:
+    for line in f:
+        win_lookup.add(line.rstrip())
+
+
 class Suit(IntEnum):
     CLUBS = 0,
     DIAMONDS = 1,
@@ -225,34 +232,7 @@ class Hand:
         self.__cards.sort()
 
     def check(self):
-        # check sets
-        set_1_4 = self.__cards[0].rank == self.__cards[1].rank == self.__cards[2].rank == self.__cards[3].rank
-        set_1_3 = set_1_4 or (self.__cards[0].rank == self.__cards[1].rank == self.__cards[2].rank)
-
-        set_4_7 = self.__cards[3].rank == self.__cards[4].rank == self.__cards[5].rank == self.__cards[6].rank
-        set_5_7 = set_4_7 or (self.__cards[4].rank == self.__cards[5].rank == self.__cards[6].rank)
-
-        if (set_1_3 and set_4_7) or (set_1_4 and set_5_7):
-            return True
-
-        # check runs
-        self.__cards.sort(key=attrgetter("suit"))  # utilize stable sorting to maintain default rank ordering but prioritize suit order
-
-        run_1_4 = self.__cards[0].suit == self.__cards[1].suit == self.__cards[2].suit == self.__cards[3].suit and ((self.__cards[0].rank + 3 == self.__cards[1].rank + 2 == self.__cards[2].rank + 1 == self.__cards[3].rank) or (self.__cards[0].rank == Rank.ACE and self.__cards[1].rank == Rank.JACK and self.__cards[2].rank == Rank.QUEEN and self.__cards[3].rank == Rank.KING))
-        run_1_3 = run_1_4 or self.__cards[0].suit == self.__cards[1].suit == self.__cards[2].suit and ((self.__cards[0].rank + 2 == self.__cards[1].rank + 1 == self.__cards[2].rank) or (self.__cards[0].rank == Rank.ACE and self.__cards[1].rank == Rank.QUEEN and self.__cards[2].rank == Rank.KING))
-
-        run_4_7 = self.__cards[3].suit == self.__cards[4].suit == self.__cards[5].suit == self.__cards[6].suit and ((self.__cards[3].rank + 3 == self.__cards[4].rank + 2 == self.__cards[5].rank + 1 == self.__cards[6].rank) or (self.__cards[3].rank == Rank.ACE and self.__cards[4].rank == Rank.JACK and self.__cards[5].rank == Rank.QUEEN and self.__cards[6].rank == Rank.KING))
-        run_5_7 = run_4_7 or self.__cards[4].suit == self.__cards[4].suit == self.__cards[5].suit and ((self.__cards[4].rank + 2 == self.__cards[5].rank + 1 == self.__cards[6].rank) or (self.__cards[4].rank == Rank.ACE and self.__cards[5].rank == Rank.QUEEN and self.__cards[6].rank == Rank.KING))
-
-        if (run_1_3 and run_4_7) or (run_1_4 and run_5_7):
-            return True
-
-        if (run_1_3 and set_4_7) or (run_1_4 and set_5_7) or (set_1_3 and run_4_7) or (set_1_4 and run_5_7) or (
-                set_1_3 and run_1_4) or (set_1_4 and run_1_3) or (set_4_7 and run_5_7) or (set_5_7 and run_4_7):
-            return True
-
-        self.__cards.sort()
-        return False
+        return self.charcode in win_lookup
 
     def discard(self, key):
         self.__deck.add_to_discard_pile(self.__cards.pop(key))
@@ -292,7 +272,7 @@ if __name__ == '__main__':
     print(deck)
 
     for hand in hands:
-        print(hand, hand.charcode)
+        print(hand, hand.charcode, hand.check())
 
     for _ in range(36):
         hands[0].draw(False)

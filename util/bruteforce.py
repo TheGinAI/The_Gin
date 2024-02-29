@@ -109,7 +109,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == "load":
         with open("util/bruteforce.txt", "r") as f:
             for line in f:
-                for card in in_is_win(line):
+                for card in in_is_win(line.rstrip()):
                     print(card)
                 print("=" * 16)
 
