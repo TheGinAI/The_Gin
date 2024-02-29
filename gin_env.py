@@ -1,7 +1,4 @@
-import time
 from enum import IntEnum
-from itertools import combinations
-from multiprocessing import Pool
 from operator import attrgetter
 from random import shuffle
 
@@ -30,7 +27,8 @@ class Rank(IntEnum):
 
 
 class Card:
-    __slots__ = ["__card_id", "__rank", "__suit"]
+    __slots__ = ["__card_id", "__charcode", "__rank", "__suit"]
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     def __init__(self, card_id):
         assert type(card_id) is int, "card_id must be int"
@@ -54,6 +52,14 @@ class Card:
     @property
     def card_id(self):
         return self.__card_id
+
+    @property
+    def charcode(self):
+        return self.alphabet[self.__card_id]
+
+    @classmethod
+    def from_charcode(cls, charcode):
+        return cls(cls.alphabet.index(charcode))
 
     @property
     def rank(self):
@@ -189,6 +195,10 @@ class Hand:
         self.__deck = deck
         self.__cards = cards
 
+    @property
+    def charcode(self):
+        return "".join(card.charcode for card in self.__cards)
+
     def __str__(self):
         s = "Cards on hand:\n"
 
@@ -248,112 +258,21 @@ class Hand:
         self.__deck.add_to_discard_pile(self.__cards.pop(key))
 
 
-def set_4(ihand):
-    ihand = ihand[:]
-    hands = combinations(ihand, 4)
-
-    for hand in hands:
-        if hand[0].rank == hand[1].rank == hand[2].rank == hand[3].rank:
-            ihand.remove(hand[0])
-            ihand.remove(hand[1])
-            ihand.remove(hand[2])
-            ihand.remove(hand[3])
-
-            return ihand
-    return ihand
-
-
-def set_3(ihand):
-    ihand = ihand[:]
-    hands = combinations(ihand, 3)
-
-    for hand in hands:
-        if hand[0].rank == hand[1].rank == hand[2].rank:
-            ihand.remove(hand[0])
-            ihand.remove(hand[1])
-            ihand.remove(hand[2])
-
-            return ihand
-    return ihand
-
-
-def run_4(ihand):
-    ihand = ihand[:]
-    hands = combinations(ihand, 4)
-
-    for hand in hands:
-        if hand[0].suit == hand[1].suit == hand[2].suit == hand[3].suit and (hand[0].rank + 3 == hand[1].rank + 2 == hand[2].rank + 1 == hand[3].rank or (hand[0].rank == Rank.ACE and hand[1].rank == Rank.JACK and hand[2].rank == Rank.QUEEN and hand[3].rank == Rank.KING)):
-            ihand.remove(hand[0])
-            ihand.remove(hand[1])
-            ihand.remove(hand[2])
-            ihand.remove(hand[3])
-
-            return ihand
-    return ihand
-
-
-def run_3(ihand):
-    ihand = ihand[:]
-    hands = combinations(ihand, 3)
-
-    for hand in hands:
-        if hand[0].suit == hand[1].suit == hand[2].suit and (hand[0].rank + 2 == hand[1].rank + 1 == hand[2].rank or (hand[0].rank == Rank.ACE and hand[1].rank == Rank.QUEEN and hand[2].rank == Rank.KING)):
-            ihand.remove(hand[0])
-            ihand.remove(hand[1])
-            ihand.remove(hand[2])
-
-            return ihand
-    return ihand
-
-
-def is_win(hand):
-    len_win = len(hand) - 7
-    hand = list(hand)
-
-    return (
-            len(set_4(set_3(hand))) == len_win or
-            len(set_3(set_4(hand))) == len_win or
-
-            len(run_4(run_3(hand))) == len_win or
-            len(run_3(run_4(hand))) == len_win or
-
-            len(set_4(run_3(hand))) == len_win or
-            len(set_3(run_4(hand))) == len_win or
-
-            len(run_4(set_3(hand))) == len_win or
-            len(run_3(set_4(hand))) == len_win
-    )
-
-
 if __name__ == '__main__':
-    pool = Pool()
+    card = Card.from_rank_and_suit(Rank.KING, Suit.DIAMONDS)
+    print(card)
 
-    res = pool.imap(is_win, combinations([Card(x) for x in range(52)], 8), chunksize=131072)
+    charcode = card.charcode
+    print(charcode)
 
-    start = time.time()
-    nt = 0
-    nw = 0
-    for win in res:
-        if win:
-            nw += 1
-        nt += 1
+    print(card.from_charcode(charcode))
 
-        if not nt % 1000000:
-            print(time.time() - start, nt, nw, nw/nt)
+    # raise Exception("B")
 
-            # for card in hand:
-            #     print(card)
-            # print("=" * 16)
+    # c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
+    # print(c)
 
-
-
-
-    raise Exception("B")
-
-    c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
-    print(c)
-
-    c = 5 + Card(0)
+    # c = 5 + Card(0)
     deck = Deck()
 
     for card in deck.discard_pile:
@@ -373,7 +292,7 @@ if __name__ == '__main__':
     print(deck)
 
     for hand in hands:
-        print(hand)
+        print(hand, hand.charcode)
 
     for _ in range(36):
         hands[0].draw(False)
