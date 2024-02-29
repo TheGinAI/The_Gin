@@ -44,6 +44,9 @@ class Agent:
     def target_predict(self, obs):
         return self.actor_target.predict(obs)
 
+    def add_transition(self, obs_n, act_n, rew, new_obs_n, done_n):
+        self.replay_buffer.add(obs_n, act_n, rew, new_obs_n, float(done_n))
+
     def target_update(self):
         # update critic
         net_weights = np.array(self.critic.model.get_weights())
