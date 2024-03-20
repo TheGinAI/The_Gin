@@ -3,7 +3,7 @@ import os
 from typing import List
 
 from gin_env import Deck
-from marl.maddpg import Agent as MADDPGAgent
+from marl.maddpg import Agent as MADDPGAgent, list_softmax
 
 import numpy as np
 import tensorflow as tf
@@ -72,11 +72,11 @@ def train():
 
         # collect experience
         for i, agent in enumerate(agents):
-            agent.add_transition(obs_n, action_n, rew_n[i], new_obs_n, done)
+            agent.add_transition(obs_n, action_n, rew_n[i], new_obs_n, done) #########
         obs_n = new_obs_n
 
         for ag_idx, rew in enumerate(rew_n):
-            logger.cur_episode_reward += rew
+            logger.cur_episode_reward += rew #########
             logger.agent_rewards[ag_idx][-1] += rew
 
         if done:
@@ -91,7 +91,7 @@ def train():
         for agent in agents:
             if train_cond and len(agent.replay_buffer) > batch_size * max_episode_len:
                 if logger.train_step % update_rate == 0:  # only update every 100 steps
-                    q_loss, pol_loss = agent.update(agents, logger.train_step)
+                    q_loss, pol_loss = agent.update(agents, logger.train_step) #########
 
         # for displaying learned policies
         if display:
@@ -105,11 +105,38 @@ def train():
 
 
 if __name__ == '__main__':
-    agents = [MADDPGAgent(), MADDPGAgent()]
-
+    # Create environment
     deck = Deck()
     hands = deck.deal(2)
+    agents = [MADDPGAgent(), MADDPGAgent()]
 
+    for agent, hand in zip(agents, hands):
+        draw_or_discard_phase = 0
+        drawn_card = None
 
-    print(agents[0].predict([[1, 1, 1, 1, 1, 1, 1, 1]]))
+        # if 0, draw from face down, if 1, draw from face up
+        draw_action = int(round(np.array(agent.predict([[draw_or_discard_phase, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]))[0][0]))
+
+        if draw_action == 0:
+            print("Drawing from draw pile")
+            hand.draw_from_draw_pile()
+        elif draw_action == 1:
+            print("Drawing from discard pile")
+            drawn_card = deck.discard_pile_top
+            hand.draw_from_discard_pile()
+
+        draw_or_discard_phase = 1
+        discard_action = list_softmax(np.array(agent.predict([[draw_or_discard_phase, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]))[0][1:])
+
+        id_primary = np.argmax(discard_action)
+        print("Discarding card: " + str(hand[id_primary]))
+
+        if drawn_card:
+            if drawn_card == hand[id_primary]:
+                print("Can't dicard card drawn from discard pile")
+
+                discard_action = np.delete(discard_action, id_primary)
+                id_secondary = np.argmax(discard_action)
+
+                print("Discarding instead card: " + str(hand[id_secondary]))
 

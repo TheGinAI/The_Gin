@@ -6,12 +6,17 @@ from marl.replay_buffer import EfficientReplayBuffer
 tau = 0.01
 clip_norm = 0.5
 buff_size = 5
-obs_shape = (8,)
-act_shape = (8,)
+obs_shape = (10,)
+act_shape = (9,)
 batch_size = 1
 decay = 0.95  # gamma
 max_transition_experience = 100
 total_num_agents = 2
+
+
+def list_softmax(input_float32):
+    expo_x = np.exp(input_float32 - np.max(input_float32))
+    return expo_x / expo_x.sum()
 
 
 class Agent:
@@ -90,7 +95,7 @@ class ActorNetwork:
         self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
         self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
 
-        self.output_layer = tf.keras.layers.Dense(act_shape[0], activation="softmax")
+        self.output_layer = tf.keras.layers.Dense(act_shape[0], activation="linear")
 
         self.model = tf.keras.Sequential()
         self.model.add(self.input_layer)
