@@ -29,7 +29,9 @@ class Agent:
         self.actor_target = ActorNetwork(self.critic)
         self.actor_target.model.set_weights(self.actor.model.get_weights())
 
-        self.replay_buffer = EfficientReplayBuffer(max_transition_experience, total_num_agents, obs_shape[0], act_shape[0])
+        self.replay_buffer_draw = EfficientReplayBuffer(max_transition_experience, total_num_agents, obs_shape[0], act_shape[0])
+        self.replay_buffer_discard = EfficientReplayBuffer(max_transition_experience, total_num_agents, obs_shape[0], act_shape[0])
+
 
     def save(self, path):
         self.critic.model.save_weights(path + 'critic.h5', )
@@ -49,8 +51,11 @@ class Agent:
     def target_predict(self, obs):
         return self.actor_target.predict(obs)
 
-    def add_transition(self, obs_n, act_n, rew, new_obs_n, done_n):
-        self.replay_buffer.add(obs_n, act_n, rew, new_obs_n, float(done_n))
+    def add_transition_draw(self, obs_n, act_n, rew, new_obs_n, done_n):
+        self.replay_buffer_draw.add(obs_n, act_n, rew, new_obs_n, done_n)
+
+    def add_transition_discard(self, obs_n, act_n, rew, new_obs_n, done_n):
+        self.replay_buffer_discard.add(obs_n, act_n, rew, new_obs_n, done_n)
 
     def target_update(self):
         # update critic
@@ -66,7 +71,7 @@ class Agent:
         self.actor_target.model.set_weights(new_weights)
 
     def update(self, agents, step):
-        obs_n, acts_n, rew_n, next_obs_n, done_n = self.replay_buffer.sample(batch_size)
+        obs_n, acts_n, rew_n, next_obs_n, done_n = self.replay_buffer_draw.sample(batch_size)
         weights = tf.ones(rew_n.shape)
 
         # Train the critic, using the target actions in the target critic network, to determine the
@@ -74,6 +79,24 @@ class Agent:
         target_act_next = [a.target_action(obs) for a, obs in zip(agents, next_obs_n)]
         target_q_next = self.critic_target.predict(next_obs_n, target_act_next)
         q_train_target = rew_n[:, None] + decay * target_q_next
+
+
+        td_loss = self.critic.train(obs_n, acts_n, q_train_target, weights).numpy()[:, 0]
+
+        # Train the policy.
+        policy_loss = self.actor.train(obs_n, acts_n)
+
+        #-----------------------------------------------------------------------------------------
+
+        obs_n, acts_n, rew_n, next_obs_n, done_n = self.replay_buffer_discard.sample(batch_size)
+        weights = tf.ones(rew_n.shape)
+
+        # Train the critic, using the target actions in the target critic network, to determine the
+        # training target (i.e. target in MSE loss) for the critic update.
+        target_act_next = [a.target_action(obs) for a, obs in zip(agents, next_obs_n)]
+        target_q_next = self.critic_target.predict(next_obs_n, target_act_next)
+        q_train_target = rew_n[:, None] + decay * target_q_next
+
 
         td_loss = self.critic.train(obs_n, acts_n, q_train_target, weights).numpy()[:, 0]
 

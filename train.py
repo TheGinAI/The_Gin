@@ -110,33 +110,85 @@ if __name__ == '__main__':
     hands = deck.deal(2)
     agents = [MADDPGAgent(), MADDPGAgent()]
 
-    for agent, hand in zip(agents, hands):
-        draw_or_discard_phase = 0
-        drawn_card = None
+    prev_obs_draw = [[], []]
+    prev_obs_discard = [[], []]
 
-        # if 0, draw from face down, if 1, draw from face up
-        draw_action = int(round(np.array(agent.predict([[draw_or_discard_phase, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]))[0][0]))
+    prev_obs_draw[0] = [0, deck.discard_pile_top.card_id] + [x.card_id for x in hands[0]] + [0]
+    prev_obs_draw[1] = [0, deck.discard_pile_top.card_id] + [x.card_id for x in hands[1]] + [0]
 
-        if draw_action == 0:
-            print("Drawing from draw pile")
-            hand.draw_from_draw_pile()
-        elif draw_action == 1:
-            print("Drawing from discard pile")
-            drawn_card = deck.discard_pile_top
-            hand.draw_from_discard_pile()
+    prev_obs_discard[0] = [1, deck.discard_pile_top.card_id] + [x.card_id for x in hands[0]] + [0]
+    prev_obs_discard[1] = [1, deck.discard_pile_top.card_id] + [x.card_id for x in hands[1]] + [0]
 
-        draw_or_discard_phase = 1
-        discard_action = list_softmax(np.array(agent.predict([[draw_or_discard_phase, 1, 1, 1, 1, 1, 1, 1, 1, 1,]]))[0][1:])
+    while True:
+        tmp_transition_draw = [[], []]
+        tmp_transition_discard = [[], []]
 
-        id_primary = np.argmax(discard_action)
-        print("Discarding card: " + str(hand[id_primary]))
+        for agn in range(2):
+            draw_or_discard_phase = 0
+            drawn__discard_card = None
 
-        if drawn_card:
-            if drawn_card == hand[id_primary]:
-                print("Can't dicard card drawn from discard pile")
+            draw_obs = [draw_or_discard_phase, deck.discard_pile_top.card_id] + [x.card_id for x in hands[agn]] + [0]
 
-                discard_action = np.delete(discard_action, id_primary)
-                id_secondary = np.argmax(discard_action)
+            # if 0, draw from face down, if 1, draw from face up
+            draw_action_full = np.array(agents[agn].predict([draw_obs]))[0]
+            draw_action = int(round(draw_action_full[0]))
 
-                print("Discarding instead card: " + str(hand[id_secondary]))
+            if draw_action >= 0:
+                print("Drawing from draw pile")
+                hands[agn].draw_from_draw_pile()
+            elif draw_action < 0:
+                print("Drawing from discard pile")
+                drawn__discard_card = deck.discard_pile_top
+                hands[agn].draw_from_discard_pile()
 
+            draw_or_discard_phase = 1
+            discard_obs = [draw_or_discard_phase, deck.discard_pile_top.card_id] + [x.card_id for x in hands[agn]]
+            discard_action_full = np.array(agents[agn].predict([discard_obs]))[0]
+            discard_action = list_softmax(discard_action_full[1:])
+
+            id_primary = np.argmax(discard_action)
+            print("Discarding card: " + str(hands[agn][id_primary]))
+
+            if drawn__discard_card:
+                if drawn__discard_card == hands[agn][id_primary]:
+                    print("Can't dicard card drawn from discard pile")
+
+                    discard_action = np.delete(discard_action, id_primary)
+                    id_secondary = np.argmax(discard_action)
+
+                    print("Discarding instead card: " + str(hands[agn][id_secondary]))
+                    hands[agn].discard(id_secondary)
+                else:
+                    hands[agn].discard(id_primary)
+            else:
+                hands[agn].discard(id_primary)
+
+            reward = hands[agn].reward()
+            done = hands[agn].check()
+
+            tmp_transition_draw[agn] = (prev_obs_draw[agn], draw_action_full, reward, draw_obs)
+            tmp_transition_discard[agn] = (prev_obs_discard[agn], discard_action_full, reward, discard_obs)
+
+            prev_obs_draw[agn] = draw_obs
+            prev_obs_discard[agn] = discard_obs
+
+        for agn in range(2):
+            agents[agn].add_transition_draw(
+                [tmp_transition_draw[0][0], tmp_transition_draw[1][0]],
+                [tmp_transition_draw[0][1], tmp_transition_draw[1][1]],
+                tmp_transition_draw[agn][2],
+                [tmp_transition_draw[0][3], tmp_transition_draw[1][3]],
+                done
+            )
+
+            agents[agn].add_transition_discard(
+                [tmp_transition_discard[0][0], tmp_transition_discard[1][0]],
+                [tmp_transition_discard[0][1], tmp_transition_discard[1][1]],
+                tmp_transition_discard[agn][2],
+                [tmp_transition_discard[0][3], tmp_transition_discard[1][3]],
+                done
+            )
+
+        if done:
+            print(agn, " WON")
+            break

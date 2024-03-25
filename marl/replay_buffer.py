@@ -32,7 +32,7 @@ class EfficientReplayBuffer(object):
     def add(self, obs_t, action, reward, obs_tp1, done):
         for ag_idx in range(self._n_agents):
             self._obs_n[ag_idx][self._next_idx] = obs_t[ag_idx]
-            self._acts_n[ag_idx][self._next_idx]  = action[ag_idx]
+            self._acts_n[ag_idx][self._next_idx] = action[ag_idx]
             self._obs_tp1_n[ag_idx][self._next_idx] = obs_tp1[ag_idx]
         self._reward[self._next_idx] = reward
         self._done[self._next_idx] = done

@@ -11,6 +11,7 @@ with open("util/bruteforce.txt", "r") as f:
 
 
 class Suit(IntEnum):
+    UNDEFINED = -1,
     CLUBS = 0,
     DIAMONDS = 1,
     HEARTS = 2,
@@ -18,6 +19,7 @@ class Suit(IntEnum):
 
 
 class Rank(IntEnum):
+    UNDEFINED = -1,
     ACE = 0,
     TWO = 1,
     THREE = 2,
@@ -141,7 +143,7 @@ class Deck:
         try:
             return self.__discard_pile[-1]
         except IndexError:
-            return None
+            return Card(-1)
 
     def __str__(self):
         s = ""
@@ -236,6 +238,9 @@ class Hand:
 
     def discard(self, key):
         self.__deck.add_to_discard_pile(self.__cards.pop(key))
+
+    def reward(self):
+        return -1
 
 
 if __name__ == '__main__':
