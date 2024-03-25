@@ -123,8 +123,6 @@ if __name__ == '__main__':
     prev_obs_discard[1] = [1, deck.discard_pile_top.card_id] + [x.card_id for x in hands[1]] + [0]
 
     while True:
-        print(step)
-
         tmp_transition_draw = [[], []]
         tmp_transition_discard = [[], []]
 
