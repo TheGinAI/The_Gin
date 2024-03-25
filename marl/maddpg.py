@@ -76,7 +76,7 @@ class Agent:
 
         # Train the critic, using the target actions in the target critic network, to determine the
         # training target (i.e. target in MSE loss) for the critic update.
-        target_act_next = [a.target_action(obs) for a, obs in zip(agents, next_obs_n)]
+        target_act_next = [a.target_predict(obs) for a, obs in zip(agents, next_obs_n)]
         target_q_next = self.critic_target.predict(next_obs_n, target_act_next)
         q_train_target = rew_n[:, None] + decay * target_q_next
 
