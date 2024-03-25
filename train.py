@@ -123,6 +123,8 @@ if __name__ == '__main__':
     prev_obs_discard[1] = [1, deck.discard_pile_top.card_id] + [x.card_id for x in hands[1]] + [0]
 
     while True:
+        print(step)
+
         tmp_transition_draw = [[], []]
         tmp_transition_discard = [[], []]
 
@@ -137,10 +139,10 @@ if __name__ == '__main__':
             draw_action = int(round(draw_action_full[0]))
 
             if draw_action >= 0:
-                print("Drawing from draw pile")
+                #print("Drawing from draw pile")
                 hands[agn].draw_from_draw_pile()
             elif draw_action < 0:
-                print("Drawing from discard pile")
+                #print("Drawing from discard pile")
                 drawn__discard_card = deck.discard_pile_top
                 hands[agn].draw_from_discard_pile()
 
@@ -150,16 +152,16 @@ if __name__ == '__main__':
             discard_action = list_softmax(discard_action_full[1:])
 
             id_primary = np.argmax(discard_action)
-            print("Discarding card: " + str(hands[agn][id_primary]))
+            #print("Discarding card: " + str(hands[agn][id_primary]))
 
             if drawn__discard_card:
                 if drawn__discard_card == hands[agn][id_primary]:
-                    print("Can't dicard card drawn from discard pile")
+                    #print("Can't dicard card drawn from discard pile")
 
                     discard_action = np.delete(discard_action, id_primary)
                     id_secondary = np.argmax(discard_action)
 
-                    print("Discarding instead card: " + str(hands[agn][id_secondary]))
+                    #print("Discarding instead card: " + str(hands[agn][id_secondary]))
                     hands[agn].discard(id_secondary)
                 else:
                     hands[agn].discard(id_primary)
