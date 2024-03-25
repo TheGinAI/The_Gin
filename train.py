@@ -105,6 +105,7 @@ def train():
 
 
 if __name__ == '__main__':
+    done = False
     update_rate = 100  # match marl/maddpg.py/max_transition_experience
     step = 0
 
@@ -167,7 +168,8 @@ if __name__ == '__main__':
                 hands[agn].discard(id_primary)
 
             reward = hands[agn].reward()
-            done = hands[agn].check()
+            if hands[agn].check():
+                done = True
 
             tmp_transition_draw[agn] = (prev_obs_draw[agn], draw_action_full, reward, draw_obs)
             tmp_transition_discard[agn] = (prev_obs_discard[agn], discard_action_full, reward, discard_obs)
