@@ -105,6 +105,9 @@ def train():
 
 
 if __name__ == '__main__':
+    update_rate = 100  # match marl/maddpg.py/max_transition_experience
+    step = 0
+
     # Create environment
     deck = Deck()
     hands = deck.deal(2)
@@ -188,6 +191,10 @@ if __name__ == '__main__':
                 [tmp_transition_discard[0][3], tmp_transition_discard[1][3]],
                 done
             )
+
+            if step % update_rate == 0 and step != 0:  # only update every 100 steps
+                q_loss, pol_loss = agents[agn].update(agents, step)
+                step += 1
 
         if done:
             print(agn, " WON")
