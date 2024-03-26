@@ -175,10 +175,13 @@ class CriticNetwork:
         """
         concatenation might not work in tf.function, hence wrapper
         """
+        print(obs)
+        print(act)
         return self.__predict(obs + act)
 
     @tf.function
     def __predict(self, cat):
+        print(cat)
         return self.model(cat)
 
     def train(self, obs, act, target_q, weights):

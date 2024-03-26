@@ -196,8 +196,10 @@ if __name__ == '__main__':
 
             if step % update_rate == 0 and step != 0:  # only update every 100 steps
                 print(step)
-                # q_loss, pol_loss = agents[agn].update(agents, step) - TODO: bugs
-            step += 1
+                q_loss, pol_loss = agents[agn].update(agents, step)
+
+        print(step)
+        step += 1
 
         if done:
             print(agn, " WON")
