@@ -127,7 +127,7 @@ def test_marl(env, policy):
     time_step = env.reset()
 
     while True:
-        # trained agent
+        # trained agent, draw move
         draw_action = policy.action(time_step)
         time_step = env.step(draw_action.action)
         agn_return += time_step.reward
@@ -135,6 +135,7 @@ def test_marl(env, policy):
         if time_step.is_last():
             return [agn_return, rng_return]
 
+        # trained agent, discard move
         discard_action = policy.action(time_step)
         time_step = env.step(discard_action.action)
         agn_return += time_step.reward
