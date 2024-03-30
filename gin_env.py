@@ -1,5 +1,4 @@
 from enum import IntEnum
-from operator import attrgetter
 from random import shuffle
 
 
@@ -37,14 +36,17 @@ class Rank(IntEnum):
 
 class Card:
     __slots__ = ["__card_id", "__charcode", "__rank", "__suit"]
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"  # '-' is for undefined card
 
     def __init__(self, card_id):
         assert type(card_id) is int, "card_id must be int"
         self.__card_id = card_id
 
-        quotient, remainder = divmod(self.__card_id, 4)
-        self.__rank, self.__suit = Rank(quotient), Suit(remainder)
+        if card_id == -1:
+            self.__rank, self.__suit = Rank.UNDEFINED, Suit.UNDEFINED
+        else:
+            quotient, remainder = divmod(self.__card_id, 4)
+            self.__rank, self.__suit = Rank(quotient), Suit(remainder)
 
     @classmethod
     def from_rank_and_suit(cls, rank, suit):

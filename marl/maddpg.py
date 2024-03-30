@@ -125,7 +125,7 @@ class ActorNetwork:
         self.model.build(input_shape=obs_shape)
 
     def predict(self, obs):
-        return self.model(tf.convert_to_tensor(obs), training=False)
+        return self.model(tf.convert_to_tensor(obs), training=True)
 
     @tf.function
     def train(self, obs, act):
