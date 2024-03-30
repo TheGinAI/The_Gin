@@ -13,6 +13,7 @@ class PyGinEnv(PyEnvironment):
         self._observation_spec = BoundedArraySpec(shape=(10,), dtype=np.int32, minimum=-1, maximum=51, name='observation')
         self._episode_ended = False
 
+        self._move_num = 0
         self._player_count = player_count
         self._current_player = 0
         self._draw_or_discard = 0
@@ -31,7 +32,9 @@ class PyGinEnv(PyEnvironment):
     def _reset(self):
         self._episode_ended = False
 
+        self._move_num = 0
         self._current_player = 0
+        self._draw_or_discard = 0
         self._deck = Deck()
         self._hands = self._deck.deal(self._player_count)
 
@@ -80,9 +83,14 @@ class PyGinEnv(PyEnvironment):
             else:
                 self._hands[self._current_player].discard(id_primary)
 
+            self._move_num += 1
             self._current_player = self._current_player % self._player_count
             self._draw_or_discard = 0
-            return ts.transition(np.array([self._draw_or_discard, self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[self._current_player]] + [-1], dtype=np.int32), -1.0, 1.0)
+
+            if self._move_num >= 2000:
+                return ts.termination(np.array([self._draw_or_discard, self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[self._current_player]] + [-1], dtype=np.int32), -1.0)
+            else:
+                return ts.transition(np.array([self._draw_or_discard, self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[self._current_player]] + [-1], dtype=np.int32), -1.0, 1.0)
 
 
 if __name__ == "__main__":
