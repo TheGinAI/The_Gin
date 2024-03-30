@@ -120,31 +120,48 @@ def make_reverb(i, env, agent):
 
 
 # Might get stuck if it can't find winning card
-def test_marl(env, policies):
-    returns = [0.0] * len(policies)
+def test_marl(env, policy):
+    agn_return = 0.0
+    rng_return = 0.0
+    random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
     time_step = env.reset()
 
     while True:
-        for i, policy in enumerate(policies):
-            draw_action = policy.action(time_step)
-            time_step = env.step(draw_action.action)
-            returns[i] += time_step.reward
+        # trained agent
+        draw_action = policy.action(time_step)
+        time_step = env.step(draw_action.action)
+        agn_return += time_step.reward
 
-            if time_step.is_last():
-                return returns
+        if time_step.is_last():
+            return [agn_return, rng_return]
 
-            discard_action = policy.action(time_step)
-            time_step = env.step(discard_action.action)
-            returns[i] += time_step.reward
+        discard_action = policy.action(time_step)
+        time_step = env.step(discard_action.action)
+        agn_return += time_step.reward
 
-            if time_step.is_last():
-                return returns
+        if time_step.is_last():
+            return [agn_return, rng_return]
 
+        # random
+        draw_action = random_policy.action(time_step)
+        time_step = env.step(draw_action.action)
+        rng_return += time_step.reward
+
+        if time_step.is_last():
+            return [agn_return, rng_return]
+
+        discard_action = random_policy.action(time_step)
+        time_step = env.step(discard_action.action)
+        rng_return += time_step.reward
+
+        if time_step.is_last():
+            return [agn_return, rng_return]
 
 if __name__ == "__main__":
-    env = PyGinEnv(2)
-    agents = [make_agent(env) for _ in range(2)]
-    reverbs = [make_reverb(i, env, agents[i]) for i in range(2)]
+    eval_env = TFPyEnvironment(PyGinEnv(2))
+    train_env = PyGinEnv(2)
+    agents = [make_agent(train_env) for _ in range(2)]
+    reverbs = [make_reverb(i, train_env, agents[i]) for i in range(2)]
 
     # (Optional) Optimize by wrapping some of the code in a graph using TF function.
     #agent.train = common.function(agent.train)
@@ -155,8 +172,8 @@ if __name__ == "__main__":
 
     # Evaluate the agent's policy once before training.
     sums = [0.0] * len(agents)
-    for _ in range(0):
-        for i, x in enumerate(test_marl(env, [x.policy for x in agents])):
+    for _ in range(5):
+        for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
             sums[i] += x
 
     for i in range(len(sums)):
@@ -166,10 +183,10 @@ if __name__ == "__main__":
     print(returns)
 
     # Reset the environment.
-    time_step = env.reset()
+    time_step = train_env.reset()
 
     # Create a driver to collect experience.
-    collect_drivers = [PyDriver(env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
+    collect_drivers = [PyDriver(train_env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
 
     for _ in range(1000000):
         for agent, reverb, collect_driver in zip(agents, reverbs, collect_drivers):
@@ -190,7 +207,7 @@ if __name__ == "__main__":
         if step % 1000 == 0:
             sums = [0.0] * len(agents)
             for _ in range(5):
-                for i, x in enumerate(test_marl(env, [x.policy for x in agents])):
+                for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
                     sums[i] += x
 
             for i in range(len(sums)):
