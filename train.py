@@ -194,8 +194,8 @@ if __name__ == '__main__':
                 done
             )
 
-            #if step % update_rate == 0 and step != 0:  # only update every 100 steps
-                # q_loss, pol_loss = agents[agn].update(agents, step) - TODO: bugs
+            if step % update_rate == 0 and step != 0:  # only update every 100 steps
+                q_loss, pol_loss = agents[agn].update(agents, step)
             step += 1
 
         if done:

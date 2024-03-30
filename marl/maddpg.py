@@ -115,24 +115,22 @@ class ActorNetwork:
         self.input_layer = tf.keras.layers.Input(shape=obs_shape, dtype=tf.int8)
 
         self.hidden_layers = []
-        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
-        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
+        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu")(self.input_layer))
+        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu")(self.hidden_layers[0]))
 
-        self.output_layer = tf.keras.layers.Dense(act_shape[0], activation="linear")
+        self.output_layer = tf.keras.layers.Dense(act_shape[0], activation="linear")(self.hidden_layers[1])
 
-        self.model = tf.keras.Sequential()
-        self.model.add(self.input_layer)
-        self.model.add(self.hidden_layers[0])
-        self.model.add(self.hidden_layers[1])
-        self.model.add(self.output_layer)
+        self.model = tf.keras.Model(inputs=self.input_layer, outputs=self.output_layer)
+
+        self.model.build(input_shape=obs_shape)
 
     def predict(self, obs):
         return self.model(tf.convert_to_tensor(obs), training=False)
 
     @tf.function
-    def train(self, obs):
+    def train(self, obs, act):
         with tf.GradientTape() as tape:
-            act = self.predict(obs)
+            #tape.watch(self.model.trainable_variables)
             act_q = self.critic_network.predict(obs, act)
             policy_regularization = tf.math.reduce_mean(tf.math.square(act))
             loss = -tf.math.reduce_mean(act_q) + 1e-3 * policy_regularization
@@ -160,22 +158,21 @@ class CriticNetwork:
         self.input_layer = tf.keras.layers.Input(shape=(obs_shape[0] + act_shape[0],), dtype=tf.int8)
 
         self.hidden_layers = []
-        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
-        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu"))
+        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu")(self.input_layer))
+        self.hidden_layers.append(tf.keras.layers.Dense(64, activation="relu")(self.hidden_layers[0]))
 
-        self.output_layer = tf.keras.layers.Dense(1, activation="linear")
+        self.output_layer = tf.keras.layers.Dense(1, activation="linear")(self.hidden_layers[1])
 
-        self.model = tf.keras.Sequential()
-        self.model.add(self.input_layer)
-        self.model.add(self.hidden_layers[0])
-        self.model.add(self.hidden_layers[1])
-        self.model.add(self.output_layer)
+        self.model = tf.keras.Model(inputs=self.input_layer, outputs=self.output_layer)
+
+        self.model.build(input_shape=(obs_shape[0] + act_shape[0],))
 
     def predict(self, obs, act):
+        obs = tf.convert_to_tensor(obs)
         """
         concatenation might not work in tf.function, hence wrapper
         """
-        return self.__predict(obs + act)
+        return self.__predict(tf.squeeze(tf.concat([obs, act], -1), 1))
 
     @tf.function
     def __predict(self, cat):
@@ -185,11 +182,15 @@ class CriticNetwork:
         """
         concatenation might not work in tf.function, hence wrapper
         """
-        return self.__train(obs + act, target_q, weights)
+        obs = tf.convert_to_tensor(obs)
+        return self.__train(tf.squeeze(tf.concat([obs, act], -1), 1), target_q, weights)
 
     @tf.function
     def __train(self, cat, target_q, weights):
         with tf.GradientTape() as tape:
+            #self.model(tf.convert_to_tensor([[0] * 19]))
+            print(self.model.trainable_variables)
+            #tape.watch(self.model.trainable_variables)
             pred_q = self.__predict(cat)
             td_loss = tf.math.square(target_q - pred_q)
             loss = tf.reduce_mean(td_loss * weights)
