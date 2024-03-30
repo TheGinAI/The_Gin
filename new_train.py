@@ -2,6 +2,7 @@ import os
 
 from tf_agents.agents.ddpg.actor_network import ActorNetwork
 from tf_agents.agents.ddpg.critic_network import CriticNetwork
+from tf_agents.drivers.dynamic_step_driver import DynamicStepDriver
 from tf_agents.drivers.py_driver import PyDriver
 from tf_agents.policies import random_tf_policy, PyTFEagerPolicy
 
@@ -141,7 +142,7 @@ def test_marl(env, policies):
 
 
 if __name__ == "__main__":
-    env = TFPyEnvironment(PyGinEnv(2))
+    env = PyGinEnv(2)
     agents = [make_agent(env) for _ in range(2)]
     reverbs = [make_reverb(i, env, agents[i]) for i in range(2)]
 
@@ -154,7 +155,7 @@ if __name__ == "__main__":
 
     # Evaluate the agent's policy once before training.
     sums = [0.0] * len(agents)
-    for _ in range(5):
+    for _ in range(0):
         for i, x in enumerate(test_marl(env, [x.policy for x in agents])):
             sums[i] += x
 
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     collect_drivers = [PyDriver(env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
 
     for _ in range(1000000):
-        for i, (agent, reverb, collect_driver) in enumerate(zip(agents, reverbs, collect_drivers)):
+        for agent, reverb, collect_driver in zip(agents, reverbs, collect_drivers):
             iterator = reverb[3]
 
             # Collect a few steps and save to the replay buffer.
@@ -183,10 +184,10 @@ if __name__ == "__main__":
 
             step = agent.train_step_counter.numpy()
 
-            if step % 1000 == 0:
-                print('agix = {0}, step = {1}: loss = {2}'.format(i, step, train_loss))
+            if step % 100 == 0:
+                print('step = {0}: loss = {1}'.format(step, train_loss))
 
-        if step % 10000 == 0:
+        if step % 1000 == 0:
             sums = [0.0] * len(agents)
             for _ in range(5):
                 for i, x in enumerate(test_marl(env, [x.policy for x in agents])):
