@@ -110,7 +110,12 @@ def make_reverb(i, env, agent):
         [rb_observer],
         max_steps=100).run(env.reset())
 
-    return reverb_server, rb_observer
+    dataset = replay_buffer.as_dataset(
+        num_parallel_calls=3,
+        sample_batch_size=10,
+        num_steps=2).prefetch(3)
+
+    return reverb_server, rb_observer, dataset, iter(dataset)
 
 
 # Might get stuck if it can't find winning card
@@ -151,42 +156,44 @@ if __name__ == "__main__":
     sums = [0.0] * len(agents)
     for _ in range(5):
         for i, x in enumerate(test_marl(env, [x.policy for x in agents])):
-            print(i, x)
             sums[i] += x
 
     for i in range(len(sums)):
         sums[i] /= 5
 
     returns = [sums]
-
     print(returns)
 
     # Reset the environment.
-    time_step = train_py_env.reset()
+    time_step = env.reset()
 
     # Create a driver to collect experience.
-    collect_driver = py_driver.PyDriver(
-        env,
-        py_tf_eager_policy.PyTFEagerPolicy(
-            agent.collect_policy, use_tf_function=True),
-        [rb_observer],
-        max_steps=collect_steps_per_iteration)
+    collect_drivers = [PyDriver(env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
 
-    for _ in range(num_iterations):
+    for _ in range(1000000):
+        for i, (agent, reverb, collect_driver) in enumerate(zip(agents, reverbs, collect_drivers)):
+            iterator = reverb[3]
 
-        # Collect a few steps and save to the replay buffer.
-        time_step, _ = collect_driver.run(time_step)
+            # Collect a few steps and save to the replay buffer.
+            time_step, _ = collect_driver.run(time_step)
 
-        # Sample a batch of data from the buffer and update the agent's network.
-        experience, unused_info = next(iterator)
-        train_loss = agent.train(experience).loss
+            # Sample a batch of data from the buffer and update the agent's network.
+            experience, unused_info = next(iterator)
+            train_loss = agent.train(experience).loss
 
-        step = agent.train_step_counter.numpy()
+            step = agent.train_step_counter.numpy()
 
-        if step % log_interval == 0:
-            print('step = {0}: loss = {1}'.format(step, train_loss))
+            if step % 1000 == 0:
+                print('agix = {0}, step = {1}: loss = {2}'.format(i, step, train_loss))
 
-        if step % eval_interval == 0:
-            avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
-            print('step = {0}: Average Return = {1}'.format(step, avg_return))
-            returns.append(avg_return)
+        if step % 10000 == 0:
+            sums = [0.0] * len(agents)
+            for _ in range(5):
+                for i, x in enumerate(test_marl(env, [x.policy for x in agents])):
+                    sums[i] += x
+
+            for i in range(len(sums)):
+                sums[i] /= 5
+
+            print('step = {0}: Average Return = {1}'.format(step, sums))
+            returns.append(sums)
