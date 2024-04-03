@@ -93,9 +93,8 @@ class PyGinEnv(PyEnvironment):
                 self._hands[self._current_player].discard(id_primary)
 
             self._move_num += 1
-            self._current_player = self._current_player + 1 % self._player_count
+            self._current_player = (self._current_player + 1) % self._player_count
             self._draw_or_discard = 0
-
             if self._move_num >= 200:
                 return ts.termination(np.array([self._draw_or_discard, self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[self._current_player]] + [-1], dtype=np.int32), -1.0)
             else:
