@@ -217,9 +217,10 @@ def test_marl(env, policy):
     random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
     time_step = env.reset()
 
-    player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+    player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))  # Returns a Tensor, must convert to list
     player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
-    card_shown(player_1_hand[0],player_1_hand[1],len(env._deck.discard_pile),0,player_1_hand[2:],player_2_hand[2:])
+    card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+    input()
 
     while True:
         # trained agent, draw move
@@ -237,7 +238,7 @@ def test_marl(env, policy):
 
         # Player 1 finish
         player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-        card_shown(player_1_hand[0],player_1_hand[1],len(env._deck.discard_pile),0,player_1_hand[2:],player_2_hand[2:])
+        card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
         input()
 
         if time_step.is_last():
@@ -257,7 +258,7 @@ def test_marl(env, policy):
 
         #Player 2 Finishes
         player_2_hand = env.step([[-1, 1, 0, 0, 0, 0, 0, 0, 0]])
-        card_shown(player_2_hand[0],player_2_hand[1],len(env._deck.discard_pile),0,player_1_hand[2:],player_2_hand[2:])
+        card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
         input()
 
         if time_step.is_last():
