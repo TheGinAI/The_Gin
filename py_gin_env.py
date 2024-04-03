@@ -50,7 +50,8 @@ class PyGinEnv(PyEnvironment):
         if self._episode_ended:
             return self.reset()
 
-        if action[0] == "GET_HAND":
+        if action[0] == -1:
+            # return ts.restart(np.array([len(self._deck.draw_pile)] + [self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[action[1]]], dtype=np.int32))
             return [len(self._deck.draw_pile)] + [self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[action[1]]]
 
         elif self._draw_or_discard == 0:
