@@ -13,6 +13,7 @@ class PyGinEnv(PyEnvironment):
         self._observation_spec = BoundedArraySpec(shape=(10,), dtype=np.int32, minimum=-1, maximum=51, name='observation')
         self._episode_ended = False
 
+        self._gui_mode = False
         self._move_num = 0
         self._player_count = player_count
         self._current_player = 0
@@ -38,6 +39,7 @@ class PyGinEnv(PyEnvironment):
     def _reset(self):
         self._episode_ended = False
 
+        self._gui_mode = False
         self._move_num = 0
         self._current_player = 0
         self._draw_or_discard = 0
@@ -49,6 +51,12 @@ class PyGinEnv(PyEnvironment):
     def _step(self, action):
         if self._episode_ended:
             return self.reset()
+
+        if action == "GUI_MODE":
+            self._gui_mode = True
+            return
+        elif action == "LST_HAND" and self._gui_mode:
+            return self._last_hand
 
         elif self._draw_or_discard == 0:
             draw_action = int(round(action[0]))
@@ -88,6 +96,9 @@ class PyGinEnv(PyEnvironment):
                 self._hands[self._current_player].discard(id_secondary)
             else:
                 self._hands[self._current_player].discard(id_primary)
+
+            if self._gui_mode:
+                self._last_hand = [self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[self._current_player]]
 
             self._move_num += 1
             self._current_player = self._current_player + 1 % self._player_count
