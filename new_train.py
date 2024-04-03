@@ -215,7 +215,6 @@ def test_marl(env, policy):
     rng_return = 0.0
     random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
     time_step = env.reset()
-    env.action("GUI_MODE")
 
     while True:
         # trained agent, draw move
@@ -232,7 +231,7 @@ def test_marl(env, policy):
         agn_return += time_step.reward
 
         # Player 1 finish
-        env.action("LST_HAND")
+        env.action(["GET_HAND", 0])
         card_shown(len(env._deck.draw_pile),env._deck.discard_pile_top.card_id,len(env._deck.discard_pile),0,[card.card_id for card in env._hands[0]],[card.card_id for card in env._hand[1]])
         input()
 
