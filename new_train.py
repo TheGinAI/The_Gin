@@ -217,8 +217,8 @@ def test_marl(env, policy):
     random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
     time_step = env.reset()
 
-    player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))  # Returns a Tensor, must convert to list
-    player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+    player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]])).numpy().tolist()  # Returns a Tensor, must convert to list
+    player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]])).numpy().tolist()
     card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
     input()
 
@@ -237,7 +237,7 @@ def test_marl(env, policy):
         agn_return += time_step.reward
 
         # Player 1 finish
-        player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+        player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]])).numpy().tolist()
         card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
         input()
 
@@ -257,7 +257,7 @@ def test_marl(env, policy):
         rng_return += time_step.reward
 
         #Player 2 Finishes
-        player_2_hand = env.step([[-1, 1, 0, 0, 0, 0, 0, 0, 0]])
+        player_2_hand = env.step([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]).numpy().tolist()
         card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
         input()
 
