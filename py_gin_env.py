@@ -50,7 +50,7 @@ class PyGinEnv(PyEnvironment):
         if self._episode_ended:
             return self.reset()
 
-        if self._draw_or_discard == 0:
+        elif self._draw_or_discard == 0:
             draw_action = int(round(action[0]))
 
             if draw_action >= 0.5:
@@ -90,7 +90,7 @@ class PyGinEnv(PyEnvironment):
                 self._hands[self._current_player].discard(id_primary)
 
             self._move_num += 1
-            self._current_player = self._current_player % self._player_count
+            self._current_player = self._current_player + 1 % self._player_count
             self._draw_or_discard = 0
 
             if self._move_num >= 200:
