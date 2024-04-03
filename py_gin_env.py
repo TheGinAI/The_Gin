@@ -23,6 +23,12 @@ class PyGinEnv(PyEnvironment):
 
         # super().__init__()  # docs don't seem to include this
 
+    def hands(self):
+        return self._hands
+
+    def deck(self):
+        return self._deck
+
     def action_spec(self):
         return self._action_spec
 

@@ -231,7 +231,7 @@ def test_marl(env, policy):
         agn_return += time_step.reward
 
         # Player 1 finish
-        card_shown(len(eval_env._deck.draw_pile),eval_env._deck.discard_pile_top.card_id,len(eval_env._deck.discard_pile),0,[card.card_id for card in eval_env._hands[0]],[card.card_id for card in eval_env._hand[1]])
+        card_shown(len(env._deck.draw_pile),env._deck.discard_pile_top.card_id,len(env._deck.discard_pile),0,[card.card_id for card in env._hands[0]],[card.card_id for card in env._hand[1]])
         input()
 
         if time_step.is_last():
@@ -250,7 +250,7 @@ def test_marl(env, policy):
         rng_return += time_step.reward
 
         #Player 2 Finishes
-        card_shown(len(eval_env._deck.draw_pile),eval_env._deck.discard_pile_top.card_id,len(eval_env._deck.discard_pile),0,[card.card_id for card in eval_env._hands[0]],[card.card_id for card in eval_env._hand[1]])
+        card_shown(len(env._deck.draw_pile),env._deck.discard_pile_top.card_id,len(env._deck.discard_pile),0,[card.card_id for card in env._hands[0]],[card.card_id for card in env._hand[1]])
         input()
 
         if time_step.is_last():
