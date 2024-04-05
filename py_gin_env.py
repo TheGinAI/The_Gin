@@ -51,8 +51,9 @@ class PyGinEnv(PyEnvironment):
             return self.reset()
 
         if action[0] == -1:
+            print("OUT")
             # return ts.restart(np.array([len(self._deck.draw_pile)] + [self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[action[1]]], dtype=np.int32))
-            return [len(self._deck.draw_pile)] + [self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[action[1]]]
+            return ts.transition(np.array([len(self._deck.draw_pile)] + [self._deck.discard_pile_top.card_id] + [x.card_id for x in self._hands[action[1]]]), 0)
 
         elif self._draw_or_discard == 0:
             draw_action = int(round(action[0]))

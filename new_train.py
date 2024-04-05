@@ -218,10 +218,9 @@ def test_marl(env, policy):
     time_step = env.reset()
 
     player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-    player_1_hand = tf.make_tensor_proto(player_1_hand)
-    player_1_hand = tf.make_ndarray(player_1_hand)
-    player_1_hand = player_1_hand.tolist()
-    player_2_hand = env.step([[-1, 1, 0, 0, 0, 0, 0, 0, 0]])
+    player_1_hand = player_1_hand.observation.numpy()[0].tolist()  # Convert to list
+
+    player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
     player_2_hand = tf.make_tensor_proto(player_2_hand)
     player_2_hand = tf.make_ndarray(player_2_hand)
     player_2_hand = player_2_hand.tolist()
