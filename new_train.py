@@ -221,11 +221,9 @@ def test_marl(env, policy):
     player_1_hand = player_1_hand.observation.numpy()[0].tolist()  # Convert to list
 
     player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
-    player_2_hand = tf.make_tensor_proto(player_2_hand)
-    player_2_hand = tf.make_ndarray(player_2_hand)
-    player_2_hand = player_2_hand.tolist()
+    player_2_hand = player_2_hand.observation.numpy()[0].tolist()
     card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-    input()
+    input("Enter to continue")
 
     while True:
         # trained agent, draw move
@@ -243,11 +241,9 @@ def test_marl(env, policy):
 
         # Player 1 finish
         player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-        player_1_hand = tf.make_tensor_proto(player_1_hand)
-        player_1_hand = tf.make_ndarray(player_1_hand)
-        player_1_hand = player_1_hand.tolist()
+        player_1_hand = player_1_hand.observation.numpy()[0].tolist()
         card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        input()
+        input("Enter to continue")
 
         if time_step.is_last():
             return [agn_return, rng_return]
@@ -265,12 +261,10 @@ def test_marl(env, policy):
         rng_return += time_step.reward
 
         #Player 2 Finishes
-        player_2_hand = env.step([[-1, 1, 0, 0, 0, 0, 0, 0, 0]])
-        player_2_hand = tf.make_tensor_proto(player_2_hand)
-        player_2_hand = tf.make_ndarray(player_2_hand)
-        player_2_hand = player_2_hand.tolist()
+        player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+        player_2_hand = player_2_hand.observation.numpy()[0].tolist()
         card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        input()
+        input("Enter to continue")
 
         if time_step.is_last():
             return [agn_return, rng_return]
