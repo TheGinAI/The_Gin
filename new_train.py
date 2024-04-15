@@ -23,6 +23,7 @@ import reverb
 from py_gin_env import PyGinEnv
 
 learning_rate = 1e-3
+player_amount = 2
 
 # tf_agents.networks.sequential.Sequential([
 #     tf.keras.layers.Dense(64, activation="relu"),
