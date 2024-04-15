@@ -166,6 +166,21 @@ def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     print("           "," ".join(card_suit(52)for _ in range(1)),"".join(" " for _ in range(12)))
     print("".join("=" for _ in range(60)))
 
+def card_action(hand,action_code,deck):
+    card_drawn_x = 'Null'
+    if action_code == 2:    
+        card_index = input("Enter index number of card you'd like to discard: ")
+        hand.discard(int(card_index)-1)
+    else:
+        draw_id = input("Which deck would you like to draw from, 1 for discarded and 2 for face-down deck: ")
+        draw_id = int(draw_id)
+        if draw_id == 1:
+            card_drawn_x = deck.discard_pile_top
+            hand.draw(True)
+        else:
+            card_drawn_x = deck.draw_pile[-1]
+            hand.draw(False)
+    return card_drawn_x
 
 def make_reverb(i, env, agent):
     table_name = 'uniform_table_' + str(i)
