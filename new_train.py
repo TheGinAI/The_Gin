@@ -252,9 +252,14 @@ def test_marl(env, policy):
             return [agn_return, rng_return]
 
         # trained agent, discard move
-        discard_action = policy.action(time_step)
-        time_step = env.step(discard_action.action)
-        agn_return += time_step.reward
+        if player_amount = 2:
+            discard_action = policy.action(time_step)
+            time_step = env.step(discard_action.action)
+            agn_return += time_step.reward
+        else:
+            # discard_action = 
+            # time_step = 
+            # agn_return += 
 
         # Player 1 finish
         player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
