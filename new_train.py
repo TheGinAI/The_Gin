@@ -311,8 +311,6 @@ def test_marl(env, policy):
     else:
         discard_card_id = 0
         draw_card_id = 0
-        card_shown(player_1_hand[0],player_1_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) #Show Player 2 their card
-        input("Agent's Action Enter to continue")
     
         while True:
             # trained agent, draw move
