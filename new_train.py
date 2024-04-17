@@ -242,7 +242,7 @@ def test_marl(env, policy):
     player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
     player_2_hand = player_2_hand.observation.numpy()[0].tolist()
 
-    if vs_human = False:
+    if vs_human == False:
         card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
         input("Enter to continue")
     
@@ -273,7 +273,7 @@ def test_marl(env, policy):
                 return [agn_return, rng_return]
     
             # random
-            if vs_human = False:
+            if vs_human == False:
                 draw_action = random_policy.action(time_step)
                 time_step = env.step(draw_action.action)
                 rng_return += time_step.reward
