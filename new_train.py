@@ -242,71 +242,137 @@ def test_marl(env, policy):
     player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
     player_2_hand = player_2_hand.observation.numpy()[0].tolist()
 
-    card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-    input("Enter to continue")
-
-    while True:
-        # trained agent, draw move
-        draw_action = policy.action(time_step)
-        time_step = env.step(draw_action.action)
-        agn_return += time_step.reward
-
-        if time_step.is_last():
-            return [agn_return, rng_return]
-
-        # trained agent, discard move
-        discard_action = policy.action(time_step)
-        time_step = env.step(discard_action.action)
-        agn_return += time_step.reward
-
-        # Player 1 finish
-        player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-        player_1_hand = player_1_hand.observation.numpy()[0].tolist()
-
-        #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        print(draw_action[0][0][0], discard_action[0][0][1:])
-        print("Play 1 Action")
+    if vs_human = False:
+        card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
         input("Enter to continue")
-
-        if time_step.is_last():
-            return [agn_return, rng_return]
-
-        # random
-        if vs_human = False:
-            draw_action = random_policy.action(time_step)
+    
+        while True:
+            # trained agent, draw move
+            draw_action = policy.action(time_step)
             time_step = env.step(draw_action.action)
-            rng_return += time_step.reward
+            agn_return += time_step.reward
     
             if time_step.is_last():
                 return [agn_return, rng_return]
     
-            discard_action = random_policy.action(time_step)
+            # trained agent, discard move
+            discard_action = policy.action(time_step)
             time_step = env.step(discard_action.action)
-            rng_return += time_step.reward
-        else: 
-            draw_card_id = input("Enter where you would like to draw card? (1 for deck and 2 for discarded)")
+            agn_return += time_step.reward
+    
+            # Player 1 finish
+            player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+            player_1_hand = player_1_hand.observation.numpy()[0].tolist()
+    
+            #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            print(draw_action[0][0][0], discard_action[0][0][1:])
+            print("Play 1 Action")
+            input("Enter to continue")
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            # random
+            if vs_human = False:
+                draw_action = random_policy.action(time_step)
+                time_step = env.step(draw_action.action)
+                rng_return += time_step.reward
+        
+                if time_step.is_last():
+                    return [agn_return, rng_return]
+        
+                discard_action = random_policy.action(time_step)
+                time_step = env.step(discard_action.action)
+                rng_return += time_step.reward
+            else: 
+                draw_card_id = input("Enter where you would like to draw card? (1 for deck and 2 for discarded)")
+                # draw_action = random_policy.action(time_step)
+                # time_step = env.step(draw_action.action)
+                # rng_return += time_step.reward
+        
+                # if time_step.is_last():
+                #     return [agn_return, rng_return]
+                                     
+                discard_card_id = input("Enter which card you would like to discard? (1 - 8)")
+                # discard_action = random_policy.action(time_step)
+                # time_step = env.step(discard_action.action)
+                # rng_return += time_step.reward
+    
+            #Player 2 Finishes
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+    
+            #card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            #print("Play 2 Action")
+            #input("Enter to continue")
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    else:
+        discard_card_id = 0
+        draw_card_id = 0
+        card_shown(player_1_hand[0],player_1_hand[1],0,0,player_2_hand[2:]) #Show Player 2 their card
+        input("Agent's Action Enter to continue")
+    
+        while True:
+            # trained agent, draw move
+            draw_action = policy.action(time_step)
+            time_step = env.step(draw_action.action)
+            agn_return += time_step.reward
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            # trained agent, discard move
+            discard_action = policy.action(time_step)
+            time_step = env.step(discard_action.action)
+            agn_return += time_step.reward
+    
+            # Player 1 finish
+            player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+            player_1_hand = player_1_hand.observation.numpy()[0].tolist()
+    
+            #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            # print(draw_action[0][0][0], discard_action[0][0][1:])
+            # print("Play 1 Action")
+            # input("Enter to continue")
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            # Player Action
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:]) 
+
+            print("Player 2's Drawing Action")
+            draw_card_id = input("Where would you like to draw card? (1 for deck and 2 for discarded)")
             # draw_action = random_policy.action(time_step)
             # time_step = env.step(draw_action.action)
             # rng_return += time_step.reward
     
-            # if time_step.is_last():
-            #     return [agn_return, rng_return]
-                                 
-            discard_card_id = input("Enter which card you would like to discard? (1 - 8)")
+            if time_step.is_last():
+                return [agn_return, rng_return]
+
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:])
+            print("Player 2's Discarding Action")
+            discard_card_id = input("Which card would you like to discard? (pick from 1 - 8)")
             # discard_action = random_policy.action(time_step)
             # time_step = env.step(discard_action.action)
             # rng_return += time_step.reward
 
-        #Player 2 Finishes
-        player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
-        player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-
-        #card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        #print("Play 2 Action")
-        #input("Enter to continue")
-
-        if time_step.is_last():
-            return [agn_return, rng_return]
+            #Player 2 Finishes
+            
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:])
+            print("Play 2 Action Finish")
+            input("Enter to continue")
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
 
 if __name__ == "__main__":
     eval_env = TFPyEnvironment(PyGinEnv(2))
