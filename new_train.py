@@ -344,7 +344,7 @@ def test_marl(env, policy):
             card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) 
 
             print("Player 2's Drawing Action")
-            draw_card_id = input("Where would you like to draw card? (1 for deck and 2 for discarded)")
+            draw_card_id = input("Where would you like to draw card? (1 for deck and 2 for discarded): ")
             # draw_action = random_policy.action(time_step)
             # time_step = env.step(draw_action.action)
             # rng_return += time_step.reward
@@ -354,9 +354,9 @@ def test_marl(env, policy):
 
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],[56,56,56,56,56,56,56],0,0,player_2_hand[2:])
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) 
             print("Player 2's Discarding Action")
-            discard_card_id = input("Which card would you like to discard? (pick from 1 - 8)")
+            discard_card_id = input("Which card would you like to discard? (pick from 1 - 8): ")
             # discard_action = random_policy.action(time_step)
             # time_step = env.step(discard_action.action)
             # rng_return += time_step.reward
