@@ -228,6 +228,9 @@ def make_reverb(i, env, agent):
 
 # Might get stuck if it can't find winning card
 def test_marl(env, policy):
+    draw_card_id = 0
+    discard_card_id = 0
+    
     agn_return = 0.0
     rng_return = 0.0
     random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
@@ -269,16 +272,30 @@ def test_marl(env, policy):
             return [agn_return, rng_return]
 
         # random
-        draw_action = random_policy.action(time_step)
-        time_step = env.step(draw_action.action)
-        rng_return += time_step.reward
-
-        if time_step.is_last():
-            return [agn_return, rng_return]
-
-        discard_action = random_policy.action(time_step)
-        time_step = env.step(discard_action.action)
-        rng_return += time_step.reward
+        if vs_human = False:
+            draw_action = random_policy.action(time_step)
+            time_step = env.step(draw_action.action)
+            rng_return += time_step.reward
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            discard_action = random_policy.action(time_step)
+            time_step = env.step(discard_action.action)
+            rng_return += time_step.reward
+        else: 
+            draw_card_id = input("Enter where you would like to draw card? (1 for deck and 2 for discarded)")
+            # draw_action = random_policy.action(time_step)
+            # time_step = env.step(draw_action.action)
+            # rng_return += time_step.reward
+    
+            # if time_step.is_last():
+            #     return [agn_return, rng_return]
+                                 
+            discard_card_id = input("Enter which card you would like to discard? (1 - 8)")
+            # discard_action = random_policy.action(time_step)
+            # time_step = env.step(discard_action.action)
+            # rng_return += time_step.reward
 
         #Player 2 Finishes
         player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
