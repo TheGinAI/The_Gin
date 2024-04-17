@@ -311,7 +311,7 @@ def test_marl(env, policy):
     else:
         discard_card_id = 0
         draw_card_id = 0
-        card_shown(player_1_hand[0],player_1_hand[1],0,0,player_2_hand[2:]) #Show Player 2 their card
+        card_shown(player_1_hand[0],player_1_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) #Show Player 2 their card
         input("Agent's Action Enter to continue")
     
         while True:
@@ -343,7 +343,7 @@ def test_marl(env, policy):
             # Player Action
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:]) 
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) 
 
             print("Player 2's Drawing Action")
             draw_card_id = input("Where would you like to draw card? (1 for deck and 2 for discarded)")
@@ -356,7 +356,7 @@ def test_marl(env, policy):
 
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:])
+            card_shown(player_2_hand[0],player_2_hand[1],[56,56,56,56,56,56,56],0,0,player_2_hand[2:])
             print("Player 2's Discarding Action")
             discard_card_id = input("Which card would you like to discard? (pick from 1 - 8)")
             # discard_action = random_policy.action(time_step)
@@ -367,7 +367,7 @@ def test_marl(env, policy):
             
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:])
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:])
             input("Player 2 Action Finish, enter to continue")
     
             if time_step.is_last():
