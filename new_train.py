@@ -368,8 +368,7 @@ def test_marl(env, policy):
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
             card_shown(player_2_hand[0],player_2_hand[1],0,0,player_2_hand[2:])
-            print("Play 2 Action Finish")
-            input("Enter to continue")
+            input("Player 2 Action Finish, enter to continue")
     
             if time_step.is_last():
                 return [agn_return, rng_return]
