@@ -341,31 +341,30 @@ def test_marl(env, policy):
             # Player Action
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) 
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
 
             print("Player 2's Drawing Action")
-            draw_card_id = input("Where would you like to draw card? (1 for deck and 2 for discarded): ")
-            # draw_action = random_policy.action(time_step)
-            # time_step = env.step(draw_action.action)
-            # rng_return += time_step.reward
+            draw_card_id = int(input("Where would you like to draw card? (1 for deck and 2 for discarded): "))
+            time_step = env.step(np.array([[draw_card_id - 1, 0, 0, 0, 0, 0, 0, 0, 0]]))
     
             if time_step.is_last():
                 return [agn_return, rng_return]
 
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:]) 
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
             print("Player 2's Discarding Action")
-            discard_card_id = input("Which card would you like to discard? (pick from 1 - 8): ")
-            # discard_action = random_policy.action(time_step)
-            # time_step = env.step(discard_action.action)
-            # rng_return += time_step.reward
+            discard_card_id = int(input("Which card would you like to discard? (pick from 1 - 8): "))
+
+            dec = [int(((discard_card_id - 1) - x) == 0) for x in range(8)]
+
+            time_step = env.step(np.array([[0] + dec]))
 
             #Player 2 Finishes
             
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-            card_shown(player_2_hand[0],player_2_hand[1],0,0,[56,56,56,56,56,56,56],player_2_hand[2:])
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
             input("Player 2 Action Finish, enter to continue")
     
             if time_step.is_last():

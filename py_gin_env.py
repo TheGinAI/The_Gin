@@ -57,11 +57,11 @@ class PyGinEnv(PyEnvironment):
         elif self._draw_or_discard == 0:
             draw_action = int(round(action[0]))
 
-            if draw_action >= 0.5:
+            if draw_action < 0.5:
                 #print("Drawing from draw pile")
                 self._discarded = Card(-1)
                 self._hands[self._current_player].draw_from_draw_pile()
-            elif draw_action < 0.5:
+            elif draw_action >= 0.5:
                 #print("Drawing from discard pile")
                 self._discarded = self._deck.discard_pile_top
                 self._hands[self._current_player].draw_from_discard_pile()
