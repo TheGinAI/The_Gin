@@ -22,7 +22,7 @@ import reverb
 
 from py_gin_env import PyGinEnv
 
-learning_rate = 1e-3
+learning_rate = 1e-7
 player_amount = 2
 
 # tf_agents.networks.sequential.Sequential([
@@ -46,7 +46,7 @@ def make_agent(env):
         ActorNetwork(
             env.observation_spec(),
             env.action_spec(),
-            fc_layer_params=(64, 64),
+            fc_layer_params=(128, 128, 128),
             dropout_layer_params=None,
             conv_layer_params=None,
             activation_fn=tf.keras.activations.relu,
@@ -61,7 +61,7 @@ def make_agent(env):
             observation_dropout_layer_params=None,
             action_fc_layer_params=None,
             action_dropout_layer_params=None,
-            joint_fc_layer_params=(64, 64),
+            joint_fc_layer_params=(128, 128, 128),
             joint_dropout_layer_params=None,
             activation_fn=tf.keras.activations.relu,
             output_activation_fn=None,
@@ -252,21 +252,16 @@ def test_marl(env, policy):
             return [agn_return, rng_return]
 
         # trained agent, discard move
-        if player_amount = 2:
-            discard_action = policy.action(time_step)
-            time_step = env.step(discard_action.action)
-            agn_return += time_step.reward
-        else:
-            # discard_action = 
-            # time_step = 
-            # agn_return += 
+        discard_action = policy.action(time_step)
+        time_step = env.step(discard_action.action)
+        agn_return += time_step.reward
 
         # Player 1 finish
         player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
         player_1_hand = player_1_hand.observation.numpy()[0].tolist()
 
         #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        print(discard_action.action[0][0])
+        print(draw_action[0][0][0], discard_action[0][0][1:])
         print("Play 1 Action")
         input("Enter to continue")
 
@@ -345,7 +340,7 @@ if __name__ == "__main__":
 
         if step % 10000 == 0:
             sums = [0.0] * len(agents)
-            for _ in range(5):
+            for _ in range(1):
                 for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
                     sums[i] += x
 
