@@ -22,8 +22,8 @@ import reverb
 
 from py_gin_env import PyGinEnv
 
-learning_rate = 1e-7
-vs_human = True
+learning_rate = 1e-4
+vs_human = False
 
 # tf_agents.networks.sequential.Sequential([
 #     tf.keras.layers.Dense(64, activation="relu"),
@@ -243,8 +243,8 @@ def test_marl(env, policy):
     player_2_hand = player_2_hand.observation.numpy()[0].tolist()
 
     if vs_human == False:
-        card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        input("Enter to continue")
+        #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+        #input("Enter to continue")
     
         while True:
             # trained agent, draw move
@@ -265,9 +265,9 @@ def test_marl(env, policy):
             player_1_hand = player_1_hand.observation.numpy()[0].tolist()
     
             #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-            print(draw_action[0][0][0], discard_action[0][0][1:])
-            print("Play 1 Action")
-            input("Enter to continue")
+            #print(draw_action[0][0][0], discard_action[0][0][1:])
+            #print("Play 1 Action")
+            #input("Enter to continue")
     
             if time_step.is_last():
                 return [agn_return, rng_return]
@@ -336,7 +336,7 @@ def test_marl(env, policy):
             # input("Enter to continue")
     
             if time_step.is_last():
-                return [agn_return, rng_return]
+                return [0, 0]
     
             # Player Action
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
@@ -348,7 +348,7 @@ def test_marl(env, policy):
             time_step = env.step(np.array([[draw_card_id - 1, 0, 0, 0, 0, 0, 0, 0, 0]]))
     
             if time_step.is_last():
-                return [agn_return, rng_return]
+                return [0, 0]
 
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
@@ -368,7 +368,7 @@ def test_marl(env, policy):
             input("Player 2 Action Finish, enter to continue")
     
             if time_step.is_last():
-                return [agn_return, rng_return]
+                return [0, 0]
 
 if __name__ == "__main__":
     eval_env = TFPyEnvironment(PyGinEnv(2))
@@ -417,9 +417,9 @@ if __name__ == "__main__":
             if step % 100 == 0:
                 print('step = {0}: loss = {1}'.format(step, train_loss))
 
-        if step % 10000 == 0:
+        if step % 1000 == 0:
             sums = [0.0] * len(agents)
-            for _ in range(1):
+            for _ in range(5):
                 for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
                     sums[i] += x
 
@@ -428,3 +428,8 @@ if __name__ == "__main__":
 
             print('step = {0}: Average Return = {1}'.format(step, sums))
             returns.append(sums)
+
+        if step % 20000 == 0:
+            vs_human = True
+            test_marl(eval_env, agents[0].policy)
+            vs_human = False
