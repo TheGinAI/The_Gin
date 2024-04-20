@@ -429,7 +429,8 @@ if __name__ == "__main__":
             print('step = {0}: Average Return = {1}'.format(step, sums))
             returns.append(sums)
 
-        if step % 20000 == 0:
-            vs_human = True
-            test_marl(eval_env, agents[0].policy)
+        if step % 30000 == 0:
+            while True:
+                vs_human = True
+                test_marl(eval_env, agents[0].policy)
             vs_human = False
