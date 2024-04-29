@@ -11,16 +11,9 @@ To utilize Machine Learning to train a model in playing the card game "gin", and
 ### Group Members and Roles
 
 * Kanglin Xu
-   * Role
+   * CEO
 * Tomas Rohatynski
-   * Role
-* Zechariah Dunlap
-   * Role
-### Group Meeting and Activities
-
-### Meeting Schedules
-
-## Getting Started
+   * President
 
 ### Dependencies
 
@@ -53,7 +46,6 @@ Contributors names and contact info
 
 * Kanglin Xu - kanglin.xu@ttu.edu
 * Tomas Rohatynski - trohatyn@ttu.edu
-* Zechariah Dunlap - zdunlap@ttu.edu
 
 ## Version History
 
