@@ -1,6 +1,6 @@
 # The_Gin
 
-A simple template of the project
+An interactive AI card game.
 
 ## Description
 
