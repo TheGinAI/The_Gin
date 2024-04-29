@@ -1,203 +1,419 @@
-import time
 import os
-from typing import List
-
-from gin_env import Deck
-from marl.maddpg import Agent as MADDPGAgent, list_softmax
 
 import numpy as np
+from tf_agents.agents.ddpg.actor_network import ActorNetwork
+from tf_agents.agents.ddpg.critic_network import CriticNetwork
+from tf_agents.drivers.py_driver import PyDriver
+from tf_agents.policies import random_tf_policy, PyTFEagerPolicy
+
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
+
+import tf_agents.agents
+from tf_agents.environments import TFPyEnvironment
+from tf_agents.specs import tensor_spec
 import tensorflow as tf
+from tf_agents.replay_buffers import reverb_replay_buffer
+from tf_agents.replay_buffers import reverb_utils
+import reverb
 
-if tf.config.experimental.list_physical_devices('GPU'):
-    tf.config.experimental.set_memory_growth(tf.config.experimental.list_physical_devices('GPU')[0],
-                                             True)
 
-def train():
-    """
-    This is the main training function, which includes the setup and training loop.
-    It is meant to be called automatically by sacred, but can be used without it as well.
+from py_gin_env import PyGinEnv
 
-    :param _run:            Sacred _run object for legging
-    :param exp_name:        (str) Name of the experiment
-    :param save_rate:       (int) Frequency to save networks at
-    :param display:         (bool) Render the environment
-    :param restore_fp:      (str)  File-Patch to policy to restore_fp or None if not wanted.
-    :param hard_max:        (bool) Only output one action
-    :param max_episode_len: (int) number of transitions per episode
-    :param num_episodes:    (int) number of episodes
-    :param batch_size:      (int) batch size for updates
-    :param update_rate:     (int) perform critic update every n environment steps
-    :param use_target_action:   (bool) use action from target network
-    :return:    List of episodic rewards
-    """
-    # Create environment
-    print(_run.config)
-    env = make_env()
+learning_rate = 1e-4
+vs_human = False
 
-    # Create agents
-    agents = get_agents(_run, env, env.n_adversaries)
+def make_agent(env):
+    ddpg = tf_agents.agents.DdpgAgent(
+        env.time_step_spec(),
+        env.action_spec(),
+        ActorNetwork(
+            env.observation_spec(),
+            env.action_spec(),
+            fc_layer_params=(128, 128, 128),
+            dropout_layer_params=None,
+            conv_layer_params=None,
+            activation_fn=tf.keras.activations.relu,
+            kernel_initializer=None,
+            last_kernel_initializer=None,
+            name="ActorNetwork"
+        ),
+        CriticNetwork(
+            (env.observation_spec(), env.action_spec()),
+            observation_conv_layer_params=None,
+            observation_fc_layer_params=None,
+            observation_dropout_layer_params=None,
+            action_fc_layer_params=None,
+            action_dropout_layer_params=None,
+            joint_fc_layer_params=(128, 128, 128),
+            joint_dropout_layer_params=None,
+            activation_fn=tf.keras.activations.relu,
+            output_activation_fn=None,
+            kernel_initializer=None,
+            last_kernel_initializer=None,
+            last_layer=None,
+            name="CriticNetwork"
+        ),
+        tf.keras.optimizers.Adam(learning_rate=learning_rate),
+        tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    )
 
-    logger = RLLogger(exp_name, _run, len(agents), env.n_adversaries, save_rate)
+    ddpg.initialize()
+    return ddpg
 
-    # Load previous results, if necessary
-    if restore_fp is not None:
-        print('Loading previous state...')
-        for ag_idx, agent in enumerate(agents):
-            fp = os.path.join(restore_fp, 'agent_{}'.format(ag_idx))
-            agent.load(fp)
+def card_suit(card_id):
+    poker_deck = {
+    0: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': 'A ', 'suit': 'Club'},
+    1: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': 'A ', 'suit': 'Diamond'},
+    2: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': 'A ', 'suit': 'Heart'},
+    3: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': 'A ', 'suit': 'Spade'},
+    4: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '2 ', 'suit': 'Club'},
+    5: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '2 ', 'suit': 'Diamond'},
+    6: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '2 ', 'suit': 'Heart'},
+    7: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '2 ', 'suit': 'Spade'},
+    8: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '3 ', 'suit': 'Club'},
+    9: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '3 ', 'suit': 'Diamond'},
+    10: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '3 ', 'suit': 'Heart'},
+    11: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '3 ', 'suit': 'Spade'},
+    12: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '4 ', 'suit': 'Club'},
+    13: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '4 ', 'suit': 'Diamond'},
+    14: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '4 ', 'suit': 'Heart'},
+    15: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '4 ', 'suit': 'Spade'},
+    16: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '5 ', 'suit': 'Club'},
+    17: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '5 ', 'suit': 'Diamond'},
+    18: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '5 ', 'suit': 'Heart'},
+    19: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '5 ', 'suit': 'Spade'},
+    20: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '6 ', 'suit': 'Club'},
+    21: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '6 ', 'suit': 'Diamond'},
+    22: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '6 ', 'suit': 'Heart'},
+    23: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '6 ', 'suit': 'Spade'},
+    24: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '7 ', 'suit': 'Club'},
+    25: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '7 ', 'suit': 'Diamond'},
+    26: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '7 ', 'suit': 'Heart'},
+    27: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '7 ', 'suit': 'Spade'},
+    28: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '8 ', 'suit': 'Club'},
+    29: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '8 ', 'suit': 'Diamond'},
+    30: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '8 ', 'suit': 'Heart'},
+    31: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '8 ', 'suit': 'Spade'},
+    32: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '9 ', 'suit': 'Club'},
+    33: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '9 ', 'suit': 'Diamond'},
+    34: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '9 ', 'suit': 'Heart'},
+    35: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '9 ', 'suit': 'Spade'},
+    36: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': '10', 'suit': 'Club'},
+    37: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': '10', 'suit': 'Diamond'},
+    38: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': '10', 'suit': 'Heart'},
+    39: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': '10', 'suit': 'Spade'},
+    40: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': 'J ', 'suit': 'Club'},
+    41: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': 'J ', 'suit': 'Diamond'},
+    42: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': 'J ', 'suit': 'Heart'},
+    43: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': 'J ', 'suit': 'Spade'},
+    44: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': 'Q ', 'suit': 'Club'},
+    45: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': 'Q ', 'suit': 'Diamond'},
+    46: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': 'Q ', 'suit': 'Heart'},
+    47: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': 'Q ', 'suit': 'Spade'},
+    48: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': 'K ', 'suit': 'Club'},
+    49: {'rank_code': '|', 'suit_code': '\U00002666', 'rank': 'K ', 'suit': 'Diamond'},
+    50: {'rank_code': '|', 'suit_code': '\U00002665', 'rank': 'K ', 'suit': 'Heart'},
+    51: {'rank_code': '|', 'suit_code': '\U00002660', 'rank': 'K ', 'suit': 'Spade'},
+    52: {'rank_code': '|', 'suit_code': ' ', 'rank': '  ', 'suit': 'side_blocker'},
+    53: {'rank_code': ' ', 'suit_code': '_', 'rank': '__', 'suit': 'up_blocker'},
+    54: {'rank_code': ' ', 'suit_code': '_', 'rank': '__', 'suit': 'down_blocker'},
+    55: {'rank_code': '', 'suit_code': '\U0001F0A0', 'rank': ' x', 'suit': 'deck'},
+    56: {'rank_code': '|', 'suit_code': '?', 'rank': '? ', 'suit': 'unknown'},
+}  
+    return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
 
-    obs_n = env.reset()
-
-    print('Starting iterations...')
-    while True:
-        # get action
-        if use_target_action:
-            action_n = [agent.target_action(obs.astype(np.float32)[None])[0] for agent, obs in
-                        zip(agents, obs_n)]
+def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
+    assert len(players) <= 7 
+    
+    print("".join("=" for _ in range(60)))
+    print(" The Gin - Interactive AI Card Game")
+    
+    for p, hand in enumerate(players, start=1):
+        print("","".join("_" for _ in range((len(hand)*6)+10)))
+#         print("|           ","     ".join(str(i) for i in range(len(hand))),"  |")
+        print("|         "," ".join(card_suit(53)for _ in hand),"|")
+        
+        if active == 0 or active == p:
+            print("|player %d:"%p," ".join(card_suit(i) for i in hand),"|")
         else:
-            action_n = [agent.action(obs.astype(np.float32)) for agent, obs in zip(agents, obs_n)]
-        # environment step
-        if hard_max:
-            hard_action_n = softmax_to_argmax(action_n, agents)
-            new_obs_n, rew_n, done_n, info_n = env.step(hard_action_n)
+            print("|player %d:"%p," ".join(card_suit(56) for _ in hand),"|")
+        
+        print("|         "," ".join(card_suit(52)for _ in hand),"|")
+        print("|           ","     ".join(str(i+1) for i in range(len(hand))),"  |")
+        print("","".join("-" for _ in range((len(hand)*6)+10)))
+        
+
+    print("")
+    print(" deck:", "".join(card_suit(55)), str(deck))
+    print("           "," ".join(card_suit(53)for _ in range(1)))
+    print(" discarded:"," ".join(card_suit(i) for i in [discard_card]),'- amount:',"".join(card_suit(55)), str(discard_amount))
+    print("           "," ".join(card_suit(52)for _ in range(1)),"".join(" " for _ in range(12)))
+    print("".join("=" for _ in range(60)))
+
+def card_action(hand,action_code,deck):
+    card_drawn_x = 'Null'
+    if action_code == 2:    
+        card_index = input("Enter index number of card you'd like to discard: ")
+        hand.discard(int(card_index)-1)
+    else:
+        draw_id = input("Which deck would you like to draw from, 1 for discarded and 2 for face-down deck: ")
+        draw_id = int(draw_id)
+        if draw_id == 1:
+            card_drawn_x = deck.discard_pile_top
+            hand.draw(True)
         else:
-            action_n = [action.numpy() for action in action_n]
-            new_obs_n, rew_n, done_n, info_n = env.step(action_n)
+            card_drawn_x = deck.draw_pile[-1]
+            hand.draw(False)
+    return card_drawn_x
 
-        logger.episode_step += 1
+def make_reverb(i, env, agent):
+    table_name = 'uniform_table_' + str(i)
+    replay_buffer_signature = tensor_spec.from_spec(agent.collect_data_spec)
+    replay_buffer_signature = tensor_spec.add_outer_dim(replay_buffer_signature)
 
-        done = all(done_n)
-        terminal = (logger.episode_step >= max_episode_len)
-        done = done or terminal
+    table = reverb.Table(
+        table_name,
+        max_size=100000,
+        sampler=reverb.selectors.Uniform(),
+        remover=reverb.selectors.Fifo(),
+        rate_limiter=reverb.rate_limiters.MinSize(1),
+        signature=replay_buffer_signature)
 
-        # collect experience
-        for i, agent in enumerate(agents):
-            agent.add_transition(obs_n, action_n, rew_n[i], new_obs_n, done) #########
-        obs_n = new_obs_n
+    reverb_server = reverb.Server([table])
 
-        for ag_idx, rew in enumerate(rew_n):
-            logger.cur_episode_reward += rew #########
-            logger.agent_rewards[ag_idx][-1] += rew
+    replay_buffer = reverb_replay_buffer.ReverbReplayBuffer(
+        agent.collect_data_spec,
+        table_name=table_name,
+        sequence_length=2,
+        local_server=reverb_server)
 
-        if done:
-            obs_n = env.reset()
-            episode_step = 0
-            logger.record_episode_end(agents)
+    rb_observer = reverb_utils.ReverbAddTrajectoryObserver(
+        replay_buffer.py_client,
+        table_name,
+        sequence_length=2)
 
-        logger.train_step += 1
+    random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
 
-        # policy updates
-        train_cond = not display
-        for agent in agents:
-            if train_cond and len(agent.replay_buffer) > batch_size * max_episode_len:
-                if logger.train_step % update_rate == 0:  # only update every 100 steps
-                    q_loss, pol_loss = agent.update(agents, logger.train_step) #########
+    PyDriver(
+        env,
+        PyTFEagerPolicy(
+            random_policy, use_tf_function=True),
+        [rb_observer],
+        max_steps=100).run(env.reset())
 
-        # for displaying learned policies
-        if display:
-            time.sleep(0.1)
-            env.render()
+    dataset = replay_buffer.as_dataset(
+        num_parallel_calls=3,
+        sample_batch_size=10,
+        num_steps=2).prefetch(3)
 
-        # saves logger outputs to a file similar to the way in the original MADDPG implementation
-        if len(logger.episode_rewards) > num_episodes:
-            logger.experiment_end()
-            return logger.get_sacred_results()
+    return reverb_server, rb_observer, dataset, iter(dataset)
 
 
-if __name__ == '__main__':
-    update_rate = 100  # match marl/maddpg.py/max_transition_experience
-    step = 0
+# Might get stuck if it can't find winning card
+def test_marl(env, policy):
+    draw_card_id = 0
+    discard_card_id = 0
+    
+    agn_return = 0.0
+    rng_return = 0.0
+    random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
+    time_step = env.reset()
 
-    # Create environment
-    deck = Deck()
-    hands = deck.deal(2)
-    agents = [MADDPGAgent(), MADDPGAgent()]
+    player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+    player_1_hand = player_1_hand.observation.numpy()[0].tolist()  # Convert to list
 
-    prev_obs_draw = [[], []]
-    prev_obs_discard = [[], []]
+    player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+    player_2_hand = player_2_hand.observation.numpy()[0].tolist()
 
-    prev_obs_draw[0] = [0, deck.discard_pile_top.card_id] + [x.card_id for x in hands[0]] + [0]
-    prev_obs_draw[1] = [0, deck.discard_pile_top.card_id] + [x.card_id for x in hands[1]] + [0]
+    if vs_human == False:
+        #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+        #input("Enter to continue")
+    
+        while True:
+            # trained agent, draw move
+            draw_action = policy.action(time_step)
+            time_step = env.step(draw_action.action)
+            agn_return += time_step.reward
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            # trained agent, discard move
+            discard_action = policy.action(time_step)
+            time_step = env.step(discard_action.action)
+            agn_return += time_step.reward
+    
+            # Player 1 finish
+            player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+            player_1_hand = player_1_hand.observation.numpy()[0].tolist()
+    
+            #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            #print(draw_action[0][0][0], discard_action[0][0][1:])
+            #print("Play 1 Action")
+            #input("Enter to continue")
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            # random
+            if vs_human == False:
+                draw_action = random_policy.action(time_step)
+                time_step = env.step(draw_action.action)
+                rng_return += time_step.reward
+        
+                if time_step.is_last():
+                    return [agn_return, rng_return]
+        
+                discard_action = random_policy.action(time_step)
+                time_step = env.step(discard_action.action)
+                rng_return += time_step.reward
+            else: 
+                draw_card_id = input("Enter where you would like to draw card? (1 for deck and 2 for discarded)")
+                # draw_action = random_policy.action(time_step)
+                # time_step = env.step(draw_action.action)
+                # rng_return += time_step.reward
+        
+                # if time_step.is_last():
+                #     return [agn_return, rng_return]
+                                     
+                discard_card_id = input("Enter which card you would like to discard? (1 - 8)")
+                # discard_action = random_policy.action(time_step)
+                # time_step = env.step(discard_action.action)
+                # rng_return += time_step.reward
+    
+            #Player 2 Finishes
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+    
+            #card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            #print("Play 2 Action")
+            #input("Enter to continue")
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    else:
+        discard_card_id = 0
+        draw_card_id = 0
+    
+        while True:
+            # trained agent, draw move
+            draw_action = policy.action(time_step)
+            time_step = env.step(draw_action.action)
+            agn_return += time_step.reward
+    
+            if time_step.is_last():
+                return [agn_return, rng_return]
+    
+            # trained agent, discard move
+            discard_action = policy.action(time_step)
+            time_step = env.step(discard_action.action)
+            agn_return += time_step.reward
+    
+            # Player 1 finish
+            player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+            player_1_hand = player_1_hand.observation.numpy()[0].tolist()
+    
+            #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            # print(draw_action[0][0][0], discard_action[0][0][1:])
+            # print("Play 1 Action")
+            # input("Enter to continue")
+    
+            if time_step.is_last():
+                return [0, 0]
+    
+            # Player Action
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
 
-    prev_obs_discard[0] = [1, deck.discard_pile_top.card_id] + [x.card_id for x in hands[0]] + [0]
-    prev_obs_discard[1] = [1, deck.discard_pile_top.card_id] + [x.card_id for x in hands[1]] + [0]
+            print("Player 2's Drawing Action")
+            draw_card_id = int(input("Where would you like to draw card? (1 for deck and 2 for discarded): "))
+            time_step = env.step(np.array([[draw_card_id - 1, 0, 0, 0, 0, 0, 0, 0, 0]]))
+    
+            if time_step.is_last():
+                return [0, 0]
 
-    while True:
-        print(step)
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            print("Player 2's Discarding Action")
+            discard_card_id = int(input("Which card would you like to discard? (pick from 1 - 8): "))
 
-        tmp_transition_draw = [[], []]
-        tmp_transition_discard = [[], []]
+            dec = [int(((discard_card_id - 1) - x) == 0) for x in range(8)]
 
-        for agn in range(2):
-            draw_or_discard_phase = 0
-            drawn__discard_card = None
+            time_step = env.step(np.array([[0] + dec]))
 
-            draw_obs = [draw_or_discard_phase, deck.discard_pile_top.card_id] + [x.card_id for x in hands[agn]] + [0]
+            #Player 2 Finishes
+            
+            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
+            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
+            card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+            input("Player 2 Action Finish, enter to continue")
+    
+            if time_step.is_last():
+                return [0, 0]
 
-            # if 0, draw from face down, if 1, draw from face up
-            draw_action_full = np.array(agents[agn].predict([draw_obs]))[0]
-            draw_action = int(round(draw_action_full[0]))
+if __name__ == "__main__":
+    eval_env = TFPyEnvironment(PyGinEnv(2))
+    train_env = PyGinEnv(2)
+    agents = [make_agent(train_env) for _ in range(2)]
+    reverbs = [make_reverb(i, train_env, agents[i]) for i in range(2)]
 
-            if draw_action >= 0:
-                #print("Drawing from draw pile")
-                hands[agn].draw_from_draw_pile()
-            elif draw_action < 0:
-                #print("Drawing from discard pile")
-                drawn__discard_card = deck.discard_pile_top
-                hands[agn].draw_from_discard_pile()
+    # (Optional) Optimize by wrapping some of the code in a graph using TF function.
+    #agent.train = common.function(agent.train)
 
-            draw_or_discard_phase = 1
-            discard_obs = [draw_or_discard_phase, deck.discard_pile_top.card_id] + [x.card_id for x in hands[agn]]
-            discard_action_full = np.array(agents[agn].predict([discard_obs]))[0]
-            discard_action = list_softmax(discard_action_full[1:])
+    # Reset the train step.
+    for agent in agents:
+        agent.train_step_counter.assign(0)
 
-            id_primary = np.argmax(discard_action)
-            #print("Discarding card: " + str(hands[agn][id_primary]))
+    # Evaluate the agent's policy once before training.
+    sums = [0.0] * len(agents)
+    for _ in range(5):
+        for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
+            sums[i] += x
 
-            if drawn__discard_card:
-                if drawn__discard_card == hands[agn][id_primary]:
-                    #print("Can't dicard card drawn from discard pile")
+    for i in range(len(sums)):
+        sums[i] /= 5
 
-                    discard_action = np.delete(discard_action, id_primary)
-                    id_secondary = np.argmax(discard_action)
+    returns = [sums]
+    print(returns)
 
-                    #print("Discarding instead card: " + str(hands[agn][id_secondary]))
-                    hands[agn].discard(id_secondary)
-                else:
-                    hands[agn].discard(id_primary)
-            else:
-                hands[agn].discard(id_primary)
+    # Reset the environment.
+    time_step = train_env.reset()
 
-            reward = hands[agn].reward()
-            done = hands[agn].check()
+    # Create a driver to collect experience.
+    collect_drivers = [PyDriver(train_env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
 
-            tmp_transition_draw[agn] = (prev_obs_draw[agn], draw_action_full, reward, draw_obs)
-            tmp_transition_discard[agn] = (prev_obs_discard[agn], discard_action_full, reward, discard_obs)
+    for _ in range(1000000):
+        for agent, reverb, collect_driver in zip(agents, reverbs, collect_drivers):
+            iterator = reverb[3]
 
-            prev_obs_draw[agn] = draw_obs
-            prev_obs_discard[agn] = discard_obs
+            # Collect a few steps and save to the replay buffer.
+            time_step, _ = collect_driver.run(time_step)
 
-        for agn in range(2):
-            agents[agn].add_transition_draw(
-                [tmp_transition_draw[0][0], tmp_transition_draw[1][0]],
-                [tmp_transition_draw[0][1], tmp_transition_draw[1][1]],
-                tmp_transition_draw[agn][2],
-                [tmp_transition_draw[0][3], tmp_transition_draw[1][3]],
-                done
-            )
+            # Sample a batch of data from the buffer and update the agent's network.
+            experience, unused_info = next(iterator)
+            train_loss = agent.train(experience).loss
 
-            agents[agn].add_transition_discard(
-                [tmp_transition_discard[0][0], tmp_transition_discard[1][0]],
-                [tmp_transition_discard[0][1], tmp_transition_discard[1][1]],
-                tmp_transition_discard[agn][2],
-                [tmp_transition_discard[0][3], tmp_transition_discard[1][3]],
-                done
-            )
+            step = agent.train_step_counter.numpy()
 
-            if step % update_rate == 0 and step != 0:  # only update every 100 steps
-                q_loss, pol_loss = agents[agn].update(agents, step)
-            step += 1
+            if step % 100 == 0:
+                print('step = {0}: loss = {1}'.format(step, train_loss))
 
-        if done:
-            print(agn, " WON")
-            break
+        if step % 100 == 0:
+            sums = [0.0] * len(agents)
+            for _ in range(5):
+                for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
+                    sums[i] += x
+
+            for i in range(len(sums)):
+                sums[i] /= 5
+
+            print('step = {0}: Average Return = {1}'.format(step, sums))
+            returns.append(sums)
+
+        if step % 1000 == 0:
+            while True:
+                vs_human = True
+                test_marl(eval_env, agents[0].policy)
+            vs_human = False

@@ -1,9 +1,10 @@
 from enum import IntEnum
 from random import shuffle
 
+# Script to model a game of Straight Gin
 
+# Load lookup table of winning hands
 win_lookup = set()
-
 with open("util/bruteforce.txt", "r") as f:
     for line in f:
         win_lookup.add(line.rstrip())
@@ -40,7 +41,7 @@ class Card:
 
     def __init__(self, card_id):
         assert type(card_id) is int, "card_id must be int"
-        self.__card_id = card_id
+        self.__card_id = card_id  # card_id is a composite value of Suit and Rank using the formula 4 * Rank + Suit
 
         if card_id == -1:
             self.__rank, self.__suit = Rank.UNDEFINED, Suit.UNDEFINED
@@ -64,10 +65,12 @@ class Card:
     def card_id(self):
         return self.__card_id
 
+    # Get charcode representation of Card for writing out win lookup table
     @property
     def charcode(self):
         return self.alphabet[self.__card_id]
 
+    # Instantiate Card from charcode representation for reading in win lookup table
     @classmethod
     def from_charcode(cls, charcode):
         return cls(cls.alphabet.index(charcode))
@@ -128,18 +131,22 @@ class Deck:
     __slots__ = ["__draw_pile", "__discard_pile"]
 
     def __init__(self):
+        # Instantiate Deck by generating all cards in deck, shuffling the deck, and then placing the first card in the discard pile
         self.__draw_pile = [Card(x) for x in range(52)]
         shuffle(self.__draw_pile)
         self.__discard_pile = [self.__draw_pile.pop()]
 
+    # Face-down part of the deck
     @property
     def draw_pile(self):
         return tuple(self.__draw_pile)
 
+    # Face-up part of the deck
     @property
     def discard_pile(self):
         return tuple(self.__discard_pile)
 
+    # Get card from the top of the discard pile
     @property
     def discard_pile_top(self):
         try:
@@ -206,6 +213,7 @@ class Hand:
         self.__deck = deck
         self.__cards = cards
 
+    # Encode entire Hand as charcode string to check if it is in the win lookup table
     @property
     def charcode(self):
         return "".join(card.charcode for card in self.__cards)
@@ -245,76 +253,26 @@ class Hand:
         return -1
 
 
+# Example usage
 if __name__ == '__main__':
+    # Instantiate new deck
     deck = Deck()
-    hands = deck.deal(2)
-    print(hands[0])
-    print(hands[0].charcode, hands[0].check())
 
-#     card = Card.from_rank_and_suit(Rank.KING, Suit.DIAMONDS)
-#     print(card)
-#
-#     charcode = card.charcode
-#     print(charcode)
-#
-#     print(card.from_charcode(charcode))
-#
-#     # raise Exception("B")
-#
-#     # c = Card.from_rank_and_suit(Rank.THREE, Suit.SPADES)
-#     # print(c)
-#
-#     # c = 5 + Card(0)
-#     deck = Deck()
-#
-#     for card in deck.discard_pile:
-#         print(card)
-#     print("-----")
-#
-# #    deck.discard_pile[0] = 2 + Card(0)
-#
-#     for card in deck.discard_pile:
-#         print(card)
-#     print("-----")
-#
-#     #assert False
-#     print(deck)
-#
-#     hands = deck.deal(2)
-#     print(deck)
-#
-#     for hand in hands:
-#         print(hand, hand.charcode, hand.check())
-#
-#     for _ in range(36):
-#         hands[0].draw(False)
-#         hands[0].discard(-2)
-#
-#     print(deck)
-#     print(hands[0])
-#
-#     hands[0].draw(True)
-#     hands[0].discard(-2)
-#
-#     print(deck)
-#     print(hands[0])
-#     print(hands[0].check())
-#
-#     # hand = Hand(deck)
-#
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.SPADES))
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.DIAMONDS))
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.THREE, Suit.SPADES))
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.HEARTS))
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.FOUR, Suit.SPADES))
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.TWO, Suit.CLUBS))
-#     # hand.cards.append(Card.from_rank_and_suit(Rank.FIVE, Suit.SPADES))
-#
-#     # hand.cards.sort()
-#
-#
-#     for ca in hands[0]:
-#         print(ca)
-#         ca = Card(0)
-#     print()
-#     print(hands[0])
+    # Deal two hands from the deck
+    hands = deck.deal(2)
+
+    for hand in hands:
+        print(hand)
+
+    # Show top of the discard pile
+    print(deck.discard_pile_top)
+
+    # Draw a card from the discard pile into the 1st players hand
+    hands[0].draw_from_discard_pile()
+
+    # Check if the 1st player holds a winning hand
+    print(hands[0].check())
+
+    # Show the 1st players hand after drawing the card, and then discard he 6th card
+    print(hands[0])
+    hands[0].discard(5)
