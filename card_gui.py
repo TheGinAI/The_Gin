@@ -59,6 +59,7 @@ def card_suit(card_id):
     56: {'rank_code': '|', 'suit_code': '?', 'rank': '? ', 'suit': 'unknown'},
 }  
     return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
+#Store all unicode for card and return when called
 
 def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     assert len(players) <= 7 
@@ -89,6 +90,7 @@ def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     print("".join("=" for _ in range(60)))
     
 #     print("".join("=" for _ in range(60)))
+#Show card based on input
 
 def card_action(hand,action_code,deck):
     card_drawn_x = 'Null'
@@ -105,6 +107,7 @@ def card_action(hand,action_code,deck):
             card_drawn_x = deck.draw_pile[-1]
             hand.draw(False)
     return card_drawn_x
+#Ask for user action input
             
 def game_play(playeramount=2):
     deck = Deck()
@@ -149,6 +152,7 @@ def game_play(playeramount=2):
         if hands[1].check == True:
             print("Player 2 Won")
             break
+#Actual Game Input
 
 def init_UI():
     print("".join("=" for _ in range(62)))
@@ -206,3 +210,4 @@ def init_UI():
         game_play(3)
         
 init_UI()
+#Initial Interface Shown
