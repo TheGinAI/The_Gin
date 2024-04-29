@@ -67,7 +67,7 @@ This project is licensed under the GNU General Public License v3.0 License - see
 ## Acknowledgments
 
 Inspiration, code snippets, etc.
-[1] M. Abadi, A. Agarwal, P. Barham, E. Brevdo, Z. Chen,
+*[1] M. Abadi, A. Agarwal, P. Barham, E. Brevdo, Z. Chen,
 C. Citro, G. S. Corrado, A. Davis, J. Dean, M. Devin,
 S. Ghemawat, I. Goodfellow, A. Harp, G. Irving,
 M. Isard, Y. Jia, R. Jozefowicz, L. Kaiser, M. Kudlur,
@@ -79,22 +79,22 @@ M. Wicke, Y. Yu, and X. Zheng, “TensorFlow: Large-
 scale machine learning on heterogeneous systems,”
 2015, software available from tensorflow.org. [Online].
 Available: https://www.tensorflow.org/
-[2] J. Hu, M. P. Wellman et al., “Multiagent reinforcement
+*[2] J. Hu, M. P. Wellman et al., “Multiagent reinforcement
 learning: theoretical framework and an algorithm.” in
 ICML, vol. 98, 1998, pp. 242–250.
-[3] L. Canese, G. C. Cardarilli, L. Di Nunzio, R. Fazzolari,
+*[3] L. Canese, G. C. Cardarilli, L. Di Nunzio, R. Fazzolari,
 D. Giardino, M. Re, and S. Span`o, “Multi-agent reinforce-
 ment learning: A review of challenges and applications,”
 Applied Sciences, vol. 11, no. 11, p. 4948, 2021.
-[4] Me!, “Gin rummy,” Dec 2018. [Online]. Available:
+*[4] Me!, “Gin rummy,” Dec 2018. [Online]. Available:
 https://www.rummyrulebook.com/pages/gin-rummy/
-[5] ——, “Straight gin,” Jan 2019. [Online]. Avail-
+*[5] ——, “Straight gin,” Jan 2019. [Online]. Avail-
 able: https://www.rummyrulebook.com/pages/straight-gin-
 rummy/
-[6] R. Lowe, Y. Wu, A. Tamar, J. Harb, P. Abbeel, and I. Mor-
+*[6] R. Lowe, Y. Wu, A. Tamar, J. Harb, P. Abbeel, and I. Mor-
 datch, “Multi-agent actor-critic for mixed cooperative-
 competitive environments,” Neural Information Process-
 ing Systems (NIPS), 2017.
-[7] T. P. Lillicrap, J. J. Hunt, A. Pritzel, N. Heess, T. Erez,
+*[7] T. P. Lillicrap, J. J. Hunt, A. Pritzel, N. Heess, T. Erez,
 Y. Tassa, D. Silver, and D. Wierstra, “Continuous control
 with deep reinforcement learning,” 2019.
