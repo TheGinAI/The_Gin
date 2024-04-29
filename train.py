@@ -20,7 +20,7 @@ import reverb
 from py_gin_env import PyGinEnv
 
 learning_rate = 1e-4
-vs_human = False
+vs_human = False  # Control flag to switch between evaluating against random policy and human playing against agent
 
 def make_agent(env):
     ddpg = tf_agents.agents.DdpgAgent(
@@ -60,6 +60,7 @@ def make_agent(env):
     ddpg.initialize()
     return ddpg
 
+# Trimmed down version of UI Decoder from card_gui
 def card_suit(card_id):
     poker_deck = {
     0: {'rank_code': '|', 'suit_code': '\U00002663', 'rank': 'A ', 'suit': 'Club'},
@@ -122,6 +123,7 @@ def card_suit(card_id):
 }  
     return "".join(poker_deck[card_id][i] for i in ['rank_code','suit_code','rank','rank_code'])
 
+# Trimmed down version of card_gui
 def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     assert len(players) <= 7 
     
@@ -150,6 +152,7 @@ def card_shown(deck,discard_card,discard_amount,active,*players,**kw):
     print("           "," ".join(card_suit(52)for _ in range(1)),"".join(" " for _ in range(12)))
     print("".join("=" for _ in range(60)))
 
+# Trimmed down version of player input entry
 def card_action(hand,action_code,deck):
     card_drawn_x = 'Null'
     if action_code == 2:    
@@ -166,6 +169,7 @@ def card_action(hand,action_code,deck):
             hand.draw(False)
     return card_drawn_x
 
+# Instantiate a reverb experience replay server
 def make_reverb(i, env, agent):
     table_name = 'uniform_table_' + str(i)
     replay_buffer_signature = tensor_spec.from_spec(agent.collect_data_spec)
@@ -208,150 +212,101 @@ def make_reverb(i, env, agent):
 
     return reverb_server, rb_observer, dataset, iter(dataset)
 
-
-# Might get stuck if it can't find winning card
-def test_marl(env, policy):
-    draw_card_id = 0
-    discard_card_id = 0
-    
-    agn_return = 0.0
-    rng_return = 0.0
+# Evaluate agent by letting random policy o human player play against it
+def test_agent(env, policy):
     random_policy = random_tf_policy.RandomTFPolicy(env.time_step_spec(), env.action_spec())
     time_step = env.reset()
 
-    player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-    player_1_hand = player_1_hand.observation.numpy()[0].tolist()  # Convert to list
-
-    player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
-    player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-
+    # When playing against random policy sum the rewards of agent policy and random policy to display learning outcomes
     if vs_human == False:
-        #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-        #input("Enter to continue")
-    
+        agn_return = 0.0
+        rng_return = 0.0
+
         while True:
-            # trained agent, draw move
+            # trained agent policy draw
             draw_action = policy.action(time_step)
             time_step = env.step(draw_action.action)
             agn_return += time_step.reward
-    
+
+            # trained agent policy check win
             if time_step.is_last():
                 return [agn_return, rng_return]
-    
-            # trained agent, discard move
+
+            # trained agent policy discard
             discard_action = policy.action(time_step)
             time_step = env.step(discard_action.action)
             agn_return += time_step.reward
     
-            # Player 1 finish
-            player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-            player_1_hand = player_1_hand.observation.numpy()[0].tolist()
-    
-            #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-            #print(draw_action[0][0][0], discard_action[0][0][1:])
-            #print("Play 1 Action")
-            #input("Enter to continue")
-    
             if time_step.is_last():
                 return [agn_return, rng_return]
     
-            # random
-            if vs_human == False:
-                draw_action = random_policy.action(time_step)
-                time_step = env.step(draw_action.action)
-                rng_return += time_step.reward
-        
-                if time_step.is_last():
-                    return [agn_return, rng_return]
-        
-                discard_action = random_policy.action(time_step)
-                time_step = env.step(discard_action.action)
-                rng_return += time_step.reward
-            else: 
-                draw_card_id = input("Enter where you would like to draw card? (1 for deck and 2 for discarded)")
-                # draw_action = random_policy.action(time_step)
-                # time_step = env.step(draw_action.action)
-                # rng_return += time_step.reward
-        
-                # if time_step.is_last():
-                #     return [agn_return, rng_return]
-                                     
-                discard_card_id = input("Enter which card you would like to discard? (1 - 8)")
-                # discard_action = random_policy.action(time_step)
-                # time_step = env.step(discard_action.action)
-                # rng_return += time_step.reward
-    
-            #Player 2 Finishes
-            player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
-            player_2_hand = player_2_hand.observation.numpy()[0].tolist()
-    
-            #card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-            #print("Play 2 Action")
-            #input("Enter to continue")
-    
+            # random policy draw
+            draw_action = random_policy.action(time_step)
+            time_step = env.step(draw_action.action)
+            rng_return += time_step.reward
+
+            # random policy check win
+            if time_step.is_last():
+                return [agn_return, rng_return]
+
+            # random policy discard
+            discard_action = random_policy.action(time_step)
+            time_step = env.step(discard_action.action)
+            rng_return += time_step.reward
+
+            # check if game ended due to draw
             if time_step.is_last():
                 return [agn_return, rng_return]
     else:
-        discard_card_id = 0
-        draw_card_id = 0
-    
         while True:
-            # trained agent, draw move
+            # trained agent policy draw
             draw_action = policy.action(time_step)
             time_step = env.step(draw_action.action)
             agn_return += time_step.reward
-    
+
+            # trained agent policy check win
             if time_step.is_last():
-                return [agn_return, rng_return]
+                return None
     
-            # trained agent, discard move
+            # trained agent policy discard
             discard_action = policy.action(time_step)
             time_step = env.step(discard_action.action)
             agn_return += time_step.reward
-    
-            # Player 1 finish
-            player_1_hand = env.step(np.array([[-1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-            player_1_hand = player_1_hand.observation.numpy()[0].tolist()
-    
-            #card_shown(player_1_hand[0],player_1_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
-            # print(draw_action[0][0][0], discard_action[0][0][1:])
-            # print("Play 1 Action")
-            # input("Enter to continue")
-    
-            if time_step.is_last():
-                return [0, 0]
-    
-            # Player Action
+
+            # retrieve human player's hand
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
             card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
 
+            # human player draw
             print("Player 2's Drawing Action")
             draw_card_id = int(input("Where would you like to draw card? (1 for deck and 2 for discarded): "))
             time_step = env.step(np.array([[draw_card_id - 1, 0, 0, 0, 0, 0, 0, 0, 0]]))
-    
-            if time_step.is_last():
-                return [0, 0]
 
+            # human player check win
+            if time_step.is_last():
+                return None
+
+            # retrieve human player's hand
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
             card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
+
+            # human player discard
             print("Player 2's Discarding Action")
             discard_card_id = int(input("Which card would you like to discard? (pick from 1 - 8): "))
 
             dec = [int(((discard_card_id - 1) - x) == 0) for x in range(8)]
-
             time_step = env.step(np.array([[0] + dec]))
-
-            #Player 2 Finishes
             
             player_2_hand = env.step(np.array([[-1, 1, 0, 0, 0, 0, 0, 0, 0]]))
             player_2_hand = player_2_hand.observation.numpy()[0].tolist()
             card_shown(player_2_hand[0],player_2_hand[1],0,0,player_1_hand[2:],player_2_hand[2:])
             input("Player 2 Action Finish, enter to continue")
-    
+
+            # check if game ended in a draw
             if time_step.is_last():
-                return [0, 0]
+                return None
 
 if __name__ == "__main__":
     eval_env = TFPyEnvironment(PyGinEnv(2))
@@ -359,17 +314,14 @@ if __name__ == "__main__":
     agents = [make_agent(train_env) for _ in range(2)]
     reverbs = [make_reverb(i, train_env, agents[i]) for i in range(2)]
 
-    # (Optional) Optimize by wrapping some of the code in a graph using TF function.
-    #agent.train = common.function(agent.train)
-
-    # Reset the train step.
+    # Reset the environment
     for agent in agents:
         agent.train_step_counter.assign(0)
 
-    # Evaluate the agent's policy once before training.
+    # Evaluate the agent's policy once before training, run 5 times and average reward to give better overview of the performance
     sums = [0.0] * len(agents)
     for _ in range(5):
-        for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
+        for i, x in enumerate(test_agent(eval_env, agents[0].policy)):
             sums[i] += x
 
     for i in range(len(sums)):
@@ -378,20 +330,20 @@ if __name__ == "__main__":
     returns = [sums]
     print(returns)
 
-    # Reset the environment.
+    # Reset the environment
     time_step = train_env.reset()
 
-    # Create a driver to collect experience.
+    # Create a driver to collect experience
     collect_drivers = [PyDriver(train_env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
 
     for _ in range(1000000):
         for agent, reverb, collect_driver in zip(agents, reverbs, collect_drivers):
             iterator = reverb[3]
 
-            # Collect a few steps and save to the replay buffer.
+            # Collect a few steps and save to the replay buffer
             time_step, _ = collect_driver.run(time_step)
 
-            # Sample a batch of data from the buffer and update the agent's network.
+            # Sample a batch of data from the buffer and update the agent's network
             experience, unused_info = next(iterator)
             train_loss = agent.train(experience).loss
 
@@ -400,10 +352,11 @@ if __name__ == "__main__":
             if step % 100 == 0:
                 print('step = {0}: loss = {1}'.format(step, train_loss))
 
-        if step % 100 == 0:
+        # Every 10,000th step evaluate agent against random policy
+        if step % 1000 == 0:
             sums = [0.0] * len(agents)
             for _ in range(5):
-                for i, x in enumerate(test_marl(eval_env, agents[0].policy)):
+                for i, x in enumerate(test_agent(eval_env, agents[0].policy)):
                     sums[i] += x
 
             for i in range(len(sums)):
@@ -412,8 +365,8 @@ if __name__ == "__main__":
             print('step = {0}: Average Return = {1}'.format(step, sums))
             returns.append(sums)
 
-        if step % 1000 == 0:
-            while True:
-                vs_human = True
-                test_marl(eval_env, agents[0].policy)
+        # Every 100,000th step evaluate agent against human player (interactive)
+        if step % 100000 == 0:
+            vs_human = True
+            test_agent(eval_env, agents[0].policy)
             vs_human = False
