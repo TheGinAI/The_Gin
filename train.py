@@ -336,7 +336,7 @@ if __name__ == "__main__":
     # Create a driver to collect experience
     collect_drivers = [PyDriver(train_env, PyTFEagerPolicy(agent.collect_policy, use_tf_function=True), [reverb[1]], max_steps=2, max_episodes=1) for agent, reverb in zip(agents, reverbs)]
 
-    for _ in range(1000000):
+    while True:
         for agent, reverb, collect_driver in zip(agents, reverbs, collect_drivers):
             iterator = reverb[3]
 
@@ -353,7 +353,7 @@ if __name__ == "__main__":
                 print('step = {0}: loss = {1}'.format(step, train_loss))
 
         # Every 10,000th step evaluate agent against random policy
-        if step % 1000 == 0:
+        if step % 10000 == 0:
             sums = [0.0] * len(agents)
             for _ in range(5):
                 for i, x in enumerate(test_agent(eval_env, agents[0].policy)):

@@ -23,27 +23,23 @@ Our approach will be done by creating a set of parameters that our model will ex
 
 ### Dependencies
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
+* Recent Linux-based OS for Reverb library support
+* All dependencies in requirements.txt
+  * Can be installed using `pip install -r requirements.txt`
 
 ### Development
 This project aims to design and train an artificial neural network to play the card game gin. Similarly to the Alpha Go Zero developed by Google, our project aims to train the agent by having it play against itself and not import any game data from other players. The implementation is first designed based on MADDPG (Multi-Agent Deep Deterministic Actor-Critic Policy Gradient), where the learning involves multiple agents and environments and acts based on the other agent’s actions and environment policies. Later on, we modified the design to adapt DDPG for Multi-agent learning. To briefly summarize the essential implementation, we first define the rules of the card game gin in the environment, then design the agent that analyzes the environment and acts upon it.
 Furthermore, the agent inputs the action based on observing the environment. The other agents input the actions based on the previous actions, and the environment will reward them based on their actions. The goal of each agent is to finish the combination of cards before the other agent does so. Within the project, we also analyze each agent’s actions and improve our reward definition to fine-tune the training. 
 
 ### Executing program
-
-* How to run the program
-* Step-by-step bullets
-```
-code blocks for commands
-```
+Simply run `python train.py`
+* The agent will be trained indefinitely, and:
+  * Every 10,000 epochs it will evaluate itself against a random policy and display information about its proficiency compared to the random policy
+  * Every 100,000 epochs it will interactively play against a human using console input
 
 ## Help
-
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+It is possible to adjust the intervals at which the agent is evaluated by modifying the modulus value in train.py at line 356.  
+Unfortunately, saving/checkpointing and loading/resuming the training is currently not supported.
 
 ## Authors
 
